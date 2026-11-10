@@ -17,7 +17,11 @@ export async function POST(req: Request) {
     if (Date.now() / 1000 - decoded.auth_time > 5 * 60) {
       return NextResponse.json({ error: "Recent sign-in required." }, { status: 401 });
     }
-    if (!isEmailAllowed(decoded.email) || decoded.email_verified === false) {
+    // Accounts are created by the owner in the Firebase console (sign-ups are disabled),
+    // so email/password users are never "verified". Google sign-ins are always verified.
+    const provider = decoded.firebase?.sign_in_provider;
+    const trusted = decoded.email_verified === true || provider === "password";
+    if (!isEmailAllowed(decoded.email) || !trusted) {
       return NextResponse.json({ error: "This account is not authorised." }, { status: 403 });
     }
     const cookie = await auth.createSessionCookie(parsed.data.idToken, {

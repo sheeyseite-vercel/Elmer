@@ -41,6 +41,9 @@ service cloud.firestore {
     match /imports/{id}                 { allow read: if isMember(resource.data.businessId); allow write: if false; }
     match /audit_logs/{id}              { allow read: if isMember(resource.data.businessId); allow write: if false; }
 
+    // Holds encrypted third-party API keys: server-only, never readable by clients.
+    match /ai_providers/{id} { allow read, write: if false; }
+
     // Everything else is denied.
     match /{document=**} {
       allow read, write: if false;

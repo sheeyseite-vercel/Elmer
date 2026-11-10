@@ -47,25 +47,35 @@ export function Sidebar() {
 
 export function BottomNav() {
   const path = usePathname();
-  const [open, setOpen] = useState(false);
+  // The menu is "open for" a specific path, so it closes by itself after any navigation
+  // without needing an effect or a click handler that could interfere with the links.
+  const [openFor, setOpenFor] = useState<string | null>(null);
+  const open = openFor === path;
   const primary = NAV.filter((n) => n.primary);
   const more = NAV.filter((n) => !n.primary);
   return (
     <>
       {open && (
-        <div
-          role="dialog"
-          aria-label="More navigation"
-          className="fixed inset-x-0 bottom-[calc(var(--nav-h)+env(safe-area-inset-bottom))] z-40 mx-3 rounded-sheet border border-border bg-surface p-2 shadow-card"
-        >
-          <div className="grid grid-cols-2 gap-1">
-            {more.map((n) => (
-              <div key={n.href} onClick={() => setOpen(false)}>
-                <Item item={n} active={path.startsWith(n.href)} />
-              </div>
-            ))}
+        <>
+          <button
+            type="button"
+            aria-label="Close menu"
+            className="fixed inset-0 z-40 bg-black/40"
+            onClick={() => setOpenFor(null)}
+          />
+          <div
+            role="dialog"
+            aria-label="More navigation"
+            className="fixed right-3 z-50 w-64 max-w-[calc(100vw-1.5rem)] rounded-sheet border border-border bg-surface p-2 shadow-card"
+            style={{ bottom: "calc(var(--nav-h) + env(safe-area-inset-bottom) + 8px)" }}
+          >
+            <div className="flex flex-col gap-1">
+              {more.map((n) => (
+                <Item key={n.href} item={n} active={path.startsWith(n.href)} />
+              ))}
+            </div>
           </div>
-        </div>
+        </>
       )}
       <nav
         aria-label="Main"
@@ -78,7 +88,7 @@ export function BottomNav() {
         <button
           type="button"
           aria-expanded={open}
-          onClick={() => setOpen((o) => !o)}
+          onClick={() => setOpenFor(open ? null : path)}
           className="flex min-h-12 flex-1 flex-col items-center justify-center gap-0.5 text-[11px] text-muted"
         >
           <MoreHorizontal size={20} aria-hidden />

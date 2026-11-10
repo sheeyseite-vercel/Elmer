@@ -1,0 +1,11 @@
+rules_version = '2';
+
+// Private bucket: no direct client access. CSV uploads and generated reports are
+// handled by server code (Admin SDK) which issues short-lived signed URLs.
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

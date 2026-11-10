@@ -1,0 +1,49 @@
+rules_version = '2';
+
+// ELMER BI — Firestore Security Rules (Phase 1)
+//
+// Model: every business-scoped document carries `businessId`. A signed-in user
+// may READ a document only if their uid is in `memberUids` of that business
+// profile. ALL WRITES are denied from clients: mutations go through server
+// actions / route handlers using the Firebase Admin SDK, which validate input
+// with Zod and write audit logs. Admin SDK bypasses these rules by design.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isMember(businessId) {
+      return signedIn()
+        && exists(/databases/$(database)/documents/business_profiles/$(businessId))
+        && request.auth.uid in get(/databases/$(database)/documents/business_profiles/$(businessId)).data.memberUids;
+    }
+
+    match /business_profiles/{businessId} {
+      allow read: if signedIn() && request.auth.uid in resource.data.memberUids;
+      allow write: if false;
+    }
+
+    // Business-scoped collections: read for members only, no client writes.
+    match /data_sources/{id}            { allow read: if isMember(resource.data.businessId); allow write: if false; }
+    match /performance_metrics/{id}     { allow read: if isMember(resource.data.businessId); allow write: if false; }
+    match /search_terms/{id}            { allow read: if isMember(resource.data.businessId); allow write: if false; }
+    match /tracked_keywords/{id}        { allow read: if isMember(resource.data.businessId); allow write: if false; }
+    match /rank_checks/{id}             { allow read: if isMember(resource.data.businessId); allow write: if false; }
+    match /competitors/{id}             { allow read: if isMember(resource.data.businessId); allow write: if false; }
+    match /competitor_snapshots/{id}    { allow read: if isMember(resource.data.businessId); allow write: if false; }
+    match /reviews/{id}                 { allow read: if isMember(resource.data.businessId); allow write: if false; }
+    match /profile_tasks/{id}           { allow read: if isMember(resource.data.businessId); allow write: if false; }
+    match /lead_aggregates/{id}         { allow read: if isMember(resource.data.businessId); allow write: if false; }
+    match /ai_reports/{id}              { allow read: if isMember(resource.data.businessId); allow write: if false; }
+    match /imports/{id}                 { allow read: if isMember(resource.data.businessId); allow write: if false; }
+    match /audit_logs/{id}              { allow read: if isMember(resource.data.businessId); allow write: if false; }
+
+    // Everything else is denied.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

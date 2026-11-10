@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { FieldValue } from "firebase-admin/firestore";
 import { requireUser } from "@/lib/auth/session";
 import { adminDb } from "@/lib/firebase/admin";
 import { getBusinessForUser } from "@/lib/data/business";
@@ -34,9 +35,14 @@ export async function saveBusinessProfile(
     ? db.collection("business_profiles").doc(existing.id)
     : db.collection("business_profiles").doc();
 
+  // Firestore rejects `undefined`; blank optional fields (e.g. latitude) are removed instead.
+  const clean = Object.fromEntries(
+    Object.entries(parsed.data).map(([k, v]) => [k, v === undefined ? FieldValue.delete() : v]),
+  );
+
   await ref.set(
     {
-      ...parsed.data,
+      ...clean,
       ownerUid: existing?.ownerUid ?? user.uid,
       memberUids: existing?.memberUids ?? [user.uid],
       timezone: "Europe/Madrid",

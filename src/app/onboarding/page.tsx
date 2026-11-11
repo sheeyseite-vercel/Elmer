@@ -6,7 +6,7 @@ export const metadata = { title: "Set up your business" };
 
 export default async function OnboardingPage() {
   const user = await requireUser();
-  const existing = await getBusinessForUser(user.uid);
+  const existing = await getBusinessForUser(user.uid, { real: true });
   return (
     <main id="main" className="mx-auto max-w-xl px-4 py-8">
       <OnboardingWizard

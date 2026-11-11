@@ -34,6 +34,7 @@ export type BusinessProfile = BusinessProfileInput & {
   id: string;
   ownerUid: string;
   memberUids: string[];
+  isDemo?: boolean;
   timezone: "Europe/Madrid";
   currency: "EUR";
   createdAt: string;

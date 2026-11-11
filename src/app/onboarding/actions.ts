@@ -29,7 +29,7 @@ export async function saveBusinessProfile(
 
   const db = adminDb();
   const now = new Date().toISOString();
-  const existing = await getBusinessForUser(user.uid);
+  const existing = await getBusinessForUser(user.uid, { real: true });
 
   const ref = existing
     ? db.collection("business_profiles").doc(existing.id)

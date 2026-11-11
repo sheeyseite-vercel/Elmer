@@ -1,12 +1,13 @@
 export type NavItem = {
   href: string;
   label: string;
-  icon: "layout" | "search" | "tag" | "map" | "list" | "users" | "message" | "check" | "phone" | "sparkles" | "file" | "plug" | "settings";
+  icon: "layout" | "search" | "tag" | "map" | "list" | "users" | "message" | "check" | "phone" | "sparkles" | "file" | "plug" | "settings" | "upload";
   primary?: boolean; // shown in mobile bottom bar
 };
 
 export const NAV: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: "layout", primary: true },
+  { href: "/data", label: "Data", icon: "upload" },
   { href: "/search-insights", label: "Search insights", icon: "search" },
   { href: "/keywords", label: "Keywords", icon: "tag", primary: true },
   { href: "/geo-visibility", label: "Geo visibility", icon: "map", primary: true },

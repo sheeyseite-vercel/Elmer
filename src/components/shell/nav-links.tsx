@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   CheckSquare, FileText, LayoutDashboard, List, Map, MessageSquare, MoreHorizontal, Phone,
-  Plug, Search, Settings, Sparkles, Tag, Users,
+  Plug, Search, Settings, Sparkles, Tag, Upload, Users,
 } from "lucide-react";
 import { useState } from "react";
 import { NAV, type NavItem } from "@/lib/nav";
@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 const icons = {
   layout: LayoutDashboard, search: Search, tag: Tag, map: Map, list: List, users: Users,
   message: MessageSquare, check: CheckSquare, phone: Phone, sparkles: Sparkles, file: FileText,
-  plug: Plug, settings: Settings,
+  plug: Plug, settings: Settings, upload: Upload,
 } as const;
 
 function Item({ item, active, compact }: { item: NavItem; active: boolean; compact?: boolean }) {

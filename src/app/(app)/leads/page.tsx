@@ -1,0 +1,101 @@
+import { redirect } from "next/navigation";
+import { Card, CardTitle } from "@/components/ui/card";
+import { conversion, totals } from "@/lib/analytics/leads";
+import { requireUser } from "@/lib/auth/session";
+import { getBusinessForUser } from "@/lib/data/business";
+import { listLeadEntries } from "@/lib/data/leads";
+import { todayInMadrid } from "@/lib/data/metrics";
+import { SOURCES, type SourceKey } from "@/lib/schema/leads";
+import { DeleteLeadButton } from "./delete-button";
+import { LeadForm } from "./lead-form";
+
+export const metadata = { title: "Leads and outcomes" };
+
+const show = (n: number | null) => (n === null ? "—" : new Intl.NumberFormat("en-GB").format(n));
+const pct = (c: ReturnType<typeof conversion>) =>
+  c.rate === null ? "Not available" : `${c.rate.toFixed(1)}% (${c.bookings} of ${c.inquiries})`;
+
+export default async function LeadsPage() {
+  const user = await requireUser();
+  const business = await getBusinessForUser(user.uid);
+  if (!business) redirect("/onboarding");
+
+  const entries = await listLeadEntries(business.id);
+  const today = todayInMadrid();
+  const sources = (Object.keys(SOURCES) as SourceKey[]).filter((s) => entries.some((e) => e.source === s));
+
+  return (
+    <div className="space-y-5">
+      <div className="space-y-1">
+        <h1 className="text-2xl font-semibold">Leads and outcomes</h1>
+        <p className="text-sm text-muted">
+          Aggregate counts of calls, inquiries and bookings that you record yourself. No patient identity, appointment
+          details or medical information is stored.
+        </p>
+      </div>
+
+      <LeadForm today={today} monthStart={`${today.slice(0, 8)}01`} />
+
+      {entries.length === 0 ? (
+        <Card className="text-center">
+          <p className="text-lg font-semibold">No data yet</p>
+          <p className="mt-1 text-sm text-muted">Record your first period above.</p>
+        </Card>
+      ) : (
+        <>
+          <Card className="space-y-3">
+            <CardTitle>Totals by source</CardTitle>
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[520px] text-left text-sm">
+                <thead className="text-xs text-muted">
+                  <tr><th className="py-1 pr-3">Source</th><th className="pr-3">Calls</th><th className="pr-3">Inquiries</th><th className="pr-3">Bookings</th><th>Bookings per inquiry</th></tr>
+                </thead>
+                <tbody>
+                  {[...sources.map((s) => ({ key: s, label: SOURCES[s], list: entries.filter((e) => e.source === s) })), { key: "all", label: "All sources", list: entries }].map((r) => {
+                    const t = totals(r.list);
+                    return (
+                      <tr key={r.key} className={r.key === "all" ? "border-t-2 border-border font-medium" : "border-t border-border"}>
+                        <td className="py-2 pr-3">{r.label}</td>
+                        <td className="pr-3">{show(t.calls)}</td>
+                        <td className="pr-3">{show(t.inquiries)}</td>
+                        <td className="pr-3">{show(t.bookings)}</td>
+                        <td>{pct(conversion(r.list))}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+            <ul className="space-y-1 text-xs text-muted">
+              <li>“—” means not recorded, not zero.</li>
+              <li>
+                <strong>Bookings per inquiry</strong> = bookings ÷ inquiries, using only entries where you recorded both.
+                It is not shown when either number is missing or inquiries are zero.
+              </li>
+              <li>
+                The source is your own judgement. Google does not tell you which person who saw your listing later called
+                or booked, so these counts show activity you tracked, not proof of what caused it.
+              </li>
+            </ul>
+          </Card>
+
+          <Card className="space-y-3">
+            <CardTitle>Entries</CardTitle>
+            <ul className="space-y-2">
+              {entries.map((e) => (
+                <li key={e.id} className="rounded-xl border border-border p-3 text-sm">
+                  <p className="font-medium">{e.periodStart} to {e.periodEnd} · {SOURCES[e.source as SourceKey] ?? e.source}</p>
+                  <p className="text-muted">
+                    Calls: {show(e.calls ?? null)} · Inquiries: {show(e.inquiries ?? null)} · Bookings: {show(e.bookings ?? null)}
+                    {" · Source: manually entered"}
+                  </p>
+                  <DeleteLeadButton id={e.id} />
+                </li>
+              ))}
+            </ul>
+          </Card>
+        </>
+      )}
+    </div>
+  );
+}

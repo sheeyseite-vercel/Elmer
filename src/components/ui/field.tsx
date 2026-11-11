@@ -37,11 +37,11 @@ const controlClass =
 export function TextField(props: FieldProps & InputHTMLAttributes<HTMLInputElement>) {
   const { label, hint, error, className, ...input } = props;
   return (
-    <Wrapper label={label} name={props.name} hint={hint} error={error}>
+    <Wrapper label={label} name={props.id ?? props.name} hint={hint} error={error}>
       <input
-        id={props.name}
+        id={props.id ?? props.name}
         aria-invalid={error?.length ? true : undefined}
-        aria-describedby={[hint ? `${props.name}-hint` : "", error?.length ? `${props.name}-err` : ""].join(" ").trim() || undefined}
+        aria-describedby={[hint ? `${props.id ?? props.name}-hint` : "", error?.length ? `${props.id ?? props.name}-err` : ""].join(" ").trim() || undefined}
         {...input}
         className={cn(controlClass, className)}
       />
@@ -54,8 +54,8 @@ export function SelectField(
 ) {
   const { label, hint, error, options, className, ...select } = props;
   return (
-    <Wrapper label={label} name={props.name} hint={hint} error={error}>
-      <select id={props.name} {...select} className={cn(controlClass, className)}>
+    <Wrapper label={label} name={props.id ?? props.name} hint={hint} error={error}>
+      <select id={props.id ?? props.name} {...select} className={cn(controlClass, className)}>
         {options.map((o) => (
           <option key={o.value} value={o.value}>
             {o.label}

@@ -1,12 +1,15 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { Card, CardTitle } from "@/components/ui/card";
 import { LOCALES, LOCALE_NAME } from "@/lib/i18n/dict";
 import { getT } from "@/lib/i18n/server";
-import { deleteDemo, startDemo } from "./demo/actions";
+import { deleteDemo, resetDemo, startDemo } from "./demo/actions";
 import { setLanguage } from "./language-actions";
 
 export const metadata = { title: "Settings" };
+// The first demo start writes ~500 documents; allow it enough time.
+export const maxDuration = 60;
 
 export default async function SettingsPage() {
   const { t, locale } = await getT();
@@ -45,8 +48,9 @@ export default async function SettingsPage() {
         <CardTitle>{t("demo.title")}</CardTitle>
         <p className="text-sm text-muted">{t("demo.text")}</p>
         <div className="flex flex-wrap gap-2">
-          <form action={startDemo}><Button type="submit">{t("demo.start")}</Button></form>
-          <form action={deleteDemo}><Button type="submit" variant="ghost">{t("demo.delete")}</Button></form>
+          <form action={startDemo}><SubmitButton idle={t("demo.start")} busy={t("demo.starting")} /></form>
+          <form action={resetDemo}><SubmitButton variant="ghost" idle={t("demo.reset")} busy={t("demo.resetting")} /></form>
+          <form action={deleteDemo}><SubmitButton variant="ghost" idle={t("demo.delete")} busy={t("demo.deleting")} /></form>
         </div>
       </Card>
       <p className="text-xs text-muted">{t("settings.footer")}</p>

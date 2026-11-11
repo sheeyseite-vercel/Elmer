@@ -16,16 +16,22 @@ const PURGE = ["performance_metrics", "tracked_keywords", "rank_checks", "lead_a
 export async function purgeDemo(uid: string) {
   const db = adminDb();
   const id = demoBusinessId(uid);
-  for (const name of PURGE) {
-    for (;;) {
-      const snap = await db.collection(name).where("businessId", "==", id).limit(400).get();
-      if (snap.empty) break;
-      const batch = db.batch();
-      snap.docs.forEach((d) => batch.delete(d.ref));
-      await batch.commit();
-    }
-  }
+  await Promise.all(
+    PURGE.map(async (name) => {
+      for (;;) {
+        const snap = await db.collection(name).where("businessId", "==", id).limit(400).get();
+        if (snap.empty) break;
+        const batch = db.batch();
+        snap.docs.forEach((d) => batch.delete(d.ref));
+        await batch.commit();
+      }
+    }),
+  );
   await db.collection("business_profiles").doc(id).delete();
+}
+
+export async function demoExists(uid: string) {
+  return (await adminDb().collection("business_profiles").doc(demoBusinessId(uid)).get()).exists;
 }
 
 export async function seedDemo(uid: string) {
@@ -34,13 +40,6 @@ export async function seedDemo(uid: string) {
   const id = demoBusinessId(uid);
   const now = new Date().toISOString();
   const today = todayInMadrid();
-
-  await db.collection("business_profiles").doc(id).set({
-    name: "DEMO – Fictional Clinic", city: "Madrid", address: "", serviceArea: "", primaryLanguage: "en",
-    phone: "", website: "", bookingUrl: "", profileUrl: "", latitude: 40.4168, longitude: -3.7038,
-    reportingCadence: "weekly", isDemo: true, ownerUid: uid, memberUids: [uid],
-    timezone: "Europe/Madrid", currency: "EUR", createdAt: now, updatedAt: now,
-  });
 
   // 90 days of daily counts: weekday pattern plus pseudo-random noise (deterministic).
   let seed = 7;
@@ -116,9 +115,19 @@ export async function seedDemo(uid: string) {
     data: { businessId: id, itemKey: "hours", status: "complete", priority: "medium", dueDate: "", note: "", updatedAt: now },
   });
 
-  for (const part of chunk(writes, 400)) {
-    const batch = db.batch();
-    part.forEach((w) => batch.set(w.ref, w.data));
-    await batch.commit();
-  }
+  await Promise.all(
+    chunk(writes, 400).map(async (part) => {
+      const batch = db.batch();
+      part.forEach((w) => batch.set(w.ref, w.data));
+      await batch.commit();
+    }),
+  );
+
+  // Written last: the business existing means the whole demo data set was written.
+  await db.collection("business_profiles").doc(id).set({
+    name: "DEMO – Fictional Clinic", city: "Madrid", address: "", serviceArea: "", primaryLanguage: "en",
+    phone: "", website: "", bookingUrl: "", profileUrl: "", latitude: 40.4168, longitude: -3.7038,
+    reportingCadence: "weekly", isDemo: true, ownerUid: uid, memberUids: [uid],
+    timezone: "Europe/Madrid", currency: "EUR", createdAt: now, updatedAt: now,
+  });
 }

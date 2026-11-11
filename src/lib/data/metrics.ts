@@ -23,6 +23,32 @@ export function chunk<T>(items: T[], size: number): T[][] {
 /** Today's calendar date in the business timezone (YYYY-MM-DD). */
 export const todayInMadrid = () => new Date().toLocaleDateString("en-CA", { timeZone: "Europe/Madrid" });
 
+export const METRIC_FETCH_LIMIT = 5000;
+
+/**
+ * All stored daily values for a business. Filtered by date in memory (a date range plus the
+ * businessId filter would need a composite index that may not be deployed yet).
+ * `truncated` is true when the cap was reached, so the page can say the data may be incomplete.
+ */
+export async function fetchMetricRecords(businessId: string) {
+  const snap = await adminDb()
+    .collection("performance_metrics")
+    .where("businessId", "==", businessId)
+    .limit(METRIC_FETCH_LIMIT)
+    .get();
+  const records = snap.docs.map((d) => {
+    const x = d.data();
+    return {
+      metric: String(x.metric),
+      date: String(x.periodStart),
+      value: Number(x.value),
+      sourceKind: (x.sourceKind === "manual" ? "manual" : "google_csv") as MetricSourceKind,
+      createdAt: String(x.createdAt ?? ""),
+    };
+  });
+  return { records, truncated: snap.size >= METRIC_FETCH_LIMIT };
+}
+
 export type ImportView = {
   id: string;
   fileName: string;

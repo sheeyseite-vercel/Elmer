@@ -142,3 +142,8 @@ body {
 .elmer-pin.low { background: #ef6b6b; }
 .elmer-pin.none { background: #aab2bd; }
 .elmer-pin.clinic { background: #8aa4ff; border-radius: 6px; font-size: 16px; }
+
+@media print {
+  aside, header, nav, .no-print { display: none !important; }
+  body { background: #fff !important; color: #000 !important; }
+}

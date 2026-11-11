@@ -1,9 +1,12 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Noto_Sans_Arabic } from "next/font/google";
 import "./globals.css";
 import { RegisterSW } from "@/components/pwa/register-sw";
+import { DIR } from "@/lib/i18n/dict";
+import { getT } from "@/lib/i18n/server";
 
 const inter = Inter({ subsets: ["latin", "latin-ext"], variable: "--font-inter", display: "swap" });
+const arabic = Noto_Sans_Arabic({ subsets: ["arabic"], variable: "--font-arabic", display: "swap" });
 
 export const metadata: Metadata = {
   title: { default: "ELMER Business Intelligence", template: "%s · ELMER BI" },
@@ -21,15 +24,16 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const { locale, t } = await getT();
   return (
-    <html lang="en" dir="ltr" className={inter.variable}>
+    <html lang={locale} dir={DIR[locale]} className={`${inter.variable} ${arabic.variable}`}>
       <body>
         <a
           href="#main"
-          className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-[100] focus:rounded-lg focus:bg-surface focus:px-3 focus:py-2"
+          className="sr-only focus:not-sr-only focus:fixed focus:start-3 focus:top-3 focus:z-[100] focus:rounded-lg focus:bg-surface focus:px-3 focus:py-2"
         >
-          Skip to content
+          {t("app.skip")}
         </a>
         {children}
         <RegisterSW />

@@ -159,7 +159,7 @@ export function ImportWizard() {
                 <div key={i} className="space-y-1.5">
                   <label htmlFor={`col-${i}`} className="text-sm text-muted">
                     “{h || `Column ${i + 1}`}” is…
-                    {csv.rows[0]?.[i] ? <span className="ml-1 text-xs">(e.g. {csv.rows[0][i]})</span> : null}
+                    {csv.rows[0]?.[i] ? <span className="ms-1 text-xs">(e.g. {csv.rows[0][i]})</span> : null}
                   </label>
                   <select
                     id={`col-${i}`}
@@ -209,14 +209,14 @@ export function ImportWizard() {
             <div className="space-y-1">
               <StatusBadge tone="danger">{preview.rejectedCount} problems, these will NOT be imported</StatusBadge>
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
+                <table className="w-full text-start text-xs">
                   <thead className="text-muted">
-                    <tr><th className="py-1 pr-2">Line</th><th className="pr-2">Column</th><th>Reason</th></tr>
+                    <tr><th className="py-1 pe-2">Line</th><th className="pe-2">Column</th><th>Reason</th></tr>
                   </thead>
                   <tbody>
                     {preview.rejected.map((r, i) => (
                       <tr key={i} className="border-t border-border">
-                        <td className="py-1 pr-2">{r.line}</td><td className="pr-2">{r.column}</td><td>{r.reason}</td>
+                        <td className="py-1 pe-2">{r.line}</td><td className="pe-2">{r.column}</td><td>{r.reason}</td>
                       </tr>
                     ))}
                   </tbody>

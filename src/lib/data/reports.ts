@@ -6,7 +6,7 @@ export type ReportView = {
   id: string;
   kind: "ai_analysis" | "data_summary";
   createdAt: string;
-  language: "en" | "es";
+  language: "en" | "es" | "ar";
   question: string;
   text: string;
   providerLabel: string;
@@ -22,7 +22,7 @@ function toView(id: string, x: FirebaseFirestore.DocumentData): ReportView | nul
       id,
       kind: x.kind === "ai_analysis" ? "ai_analysis" : "data_summary",
       createdAt: String(x.createdAt),
-      language: x.language === "es" ? "es" : "en",
+      language: x.language === "es" || x.language === "ar" ? x.language : "en",
       question: String(x.question ?? ""),
       text: String(x.text ?? ""),
       providerLabel: String(x.providerLabel ?? ""),

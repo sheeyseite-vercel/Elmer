@@ -58,7 +58,7 @@ export default async function CompetitorDetail({ params }: { params: Promise<{ i
               <li key={s.id} className="space-y-1 rounded-xl border border-border p-3 text-sm">
                 <p className="font-medium">
                   {s.checkedOn}
-                  {isStale(s.checkedOn, today) && <span className="ml-2"><StatusBadge tone="warning">Stale</StatusBadge></span>}
+                  {isStale(s.checkedOn, today) && <span className="ms-2"><StatusBadge tone="warning">Stale</StatusBadge></span>}
                 </p>
                 <p>Rating: {s.rating ?? "not recorded"} · Reviews: {s.reviewCount ?? "not recorded"}</p>
                 {s.categories.length > 0 && <p className="text-muted">Categories: {s.categories.join(", ")}</p>}

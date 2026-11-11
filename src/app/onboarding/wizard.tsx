@@ -38,13 +38,13 @@ export function OnboardingWizard({ defaults }: { defaults?: Defaults }) {
         <>
           <Card>
             <CardTitle>It can</CardTitle>
-            <ul className="mt-2 list-disc space-y-1.5 pl-5 text-sm text-muted">
+            <ul className="mt-2 list-disc space-y-1.5 ps-5 text-sm text-muted">
               {CAN.map((t) => <li key={t}>{t}</li>)}
             </ul>
           </Card>
           <Card>
             <CardTitle>It cannot</CardTitle>
-            <ul className="mt-2 list-disc space-y-1.5 pl-5 text-sm text-muted">
+            <ul className="mt-2 list-disc space-y-1.5 ps-5 text-sm text-muted">
               {CANNOT.map((t) => <li key={t}>{t}</li>)}
             </ul>
           </Card>

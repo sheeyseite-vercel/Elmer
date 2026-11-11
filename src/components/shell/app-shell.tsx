@@ -1,18 +1,25 @@
-import { BottomNav, Sidebar } from "./nav-links";
+import { NAV } from "@/lib/nav";
+import { getT } from "@/lib/i18n/server";
+import { BottomNav, Sidebar, type NavLabels } from "./nav-links";
 import { SignOutButton } from "./sign-out-button";
 
-export function AppShell({ businessName, children }: { businessName: string; children: React.ReactNode }) {
+export async function AppShell({ businessName, children }: { businessName: string; children: React.ReactNode }) {
+  const { t } = await getT();
+  const labels: NavLabels = {
+    items: Object.fromEntries(NAV.map((n) => [n.href, t(n.labelKey)])),
+    more: t("nav.more"), close: t("nav.close"), main: t("nav.main"), moreNav: t("nav.moreNav"),
+  };
   return (
     <div className="min-h-dvh md:grid md:grid-cols-[250px_1fr]">
-      <aside className="sticky top-0 hidden h-dvh flex-col gap-4 border-r border-border bg-surface p-4 md:flex">
+      <aside className="sticky top-0 hidden h-dvh flex-col gap-4 border-e border-border bg-surface p-4 md:flex">
         <div>
-          <p className="text-xs uppercase tracking-wider text-muted">Business Intelligence</p>
+          <p className="text-xs uppercase tracking-wider text-muted">{t("app.tagline")}</p>
           <p className="text-lg font-semibold">{businessName}</p>
         </div>
         <div className="flex-1 overflow-y-auto">
-          <Sidebar />
+          <Sidebar labels={labels} />
         </div>
-        <SignOutButton />
+        <SignOutButton label={t("auth.signOut")} />
       </aside>
 
       <div className="flex min-w-0 flex-col">
@@ -25,7 +32,7 @@ export function AppShell({ businessName, children }: { businessName: string; chi
       </div>
 
       <div className="md:hidden">
-        <BottomNav />
+        <BottomNav labels={labels} />
       </div>
     </div>
   );

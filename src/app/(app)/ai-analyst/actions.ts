@@ -17,7 +17,7 @@ export type AnalystState = { message?: string };
 const DAILY_LIMIT = 10;
 const input = z.object({
   range: z.enum(["7", "28", "90"]),
-  language: z.enum(["en", "es"]),
+  language: z.enum(["en", "es", "ar"]),
   question: z.string().trim().max(300).optional().default(""),
 });
 

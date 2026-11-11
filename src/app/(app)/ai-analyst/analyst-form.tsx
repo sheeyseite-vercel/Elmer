@@ -16,7 +16,7 @@ export function AnalystForm() {
           <SelectField label="Period" name="range" defaultValue="28"
             options={[{ value: "7", label: "Last 7 days" }, { value: "28", label: "Last 28 days" }, { value: "90", label: "Last 3 months" }]} />
           <SelectField label="Answer language" name="language" defaultValue="en"
-            options={[{ value: "en", label: "English" }, { value: "es", label: "Español" }]} />
+            options={[{ value: "en", label: "English" }, { value: "es", label: "Español" }, { value: "ar", label: "العربية" }]} />
         </div>
         <div className="space-y-1.5">
           <label htmlFor="question" className="text-sm font-medium">Your question (optional)</label>

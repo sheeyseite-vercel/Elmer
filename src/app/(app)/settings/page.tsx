@@ -1,19 +1,35 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
+import { LOCALES, LOCALE_NAME } from "@/lib/i18n/dict";
+import { getT } from "@/lib/i18n/server";
 import { deleteDemo, startDemo } from "./demo/actions";
+import { setLanguage } from "./language-actions";
 
 export const metadata = { title: "Settings" };
 
-const items = [
-  { href: "/onboarding", title: "Business details", text: "Name, city, address, language, website and booking link." },
-  { href: "/settings/ai-providers", title: "AI providers", text: "Gemini, Groq, OpenRouter or a custom provider, and which one is active." },
-];
-
-export default function SettingsPage() {
+export default async function SettingsPage() {
+  const { t, locale } = await getT();
+  const items = [
+    { href: "/onboarding", title: t("settings.business"), text: t("settings.businessText") },
+    { href: "/settings/ai-providers", title: t("settings.ai"), text: t("settings.aiText") },
+  ];
   return (
     <div className="space-y-5">
-      <h1 className="text-2xl font-semibold">Settings</h1>
+      <h1 className="text-2xl font-semibold">{t("settings.title")}</h1>
+
+      <Card className="space-y-3">
+        <CardTitle>{t("settings.lang")}</CardTitle>
+        <p className="text-sm text-muted">{t("settings.langText")}</p>
+        <form action={setLanguage} className="flex flex-wrap gap-2">
+          {LOCALES.map((l) => (
+            <Button key={l} type="submit" name="lang" value={l} variant={l === locale ? "primary" : "ghost"} aria-pressed={l === locale} lang={l}>
+              {LOCALE_NAME[l]}
+            </Button>
+          ))}
+        </form>
+      </Card>
+
       <div className="grid gap-3 sm:grid-cols-2">
         {items.map((i) => (
           <Link key={i.href} href={i.href} className="block rounded-card focus-visible:outline-2">
@@ -24,18 +40,16 @@ export default function SettingsPage() {
           </Link>
         ))}
       </div>
+
       <Card className="space-y-3">
-        <CardTitle>Demo mode</CardTitle>
-        <p className="text-sm text-muted">
-          Explore every page with INVENTED data in a separate, clearly marked business. Your real data is not touched or
-          mixed in, and a banner shows on every page while demo mode is on. Starting it again resets the demo data.
-        </p>
+        <CardTitle>{t("demo.title")}</CardTitle>
+        <p className="text-sm text-muted">{t("demo.text")}</p>
         <div className="flex flex-wrap gap-2">
-          <form action={startDemo}><Button type="submit">Start demo</Button></form>
-          <form action={deleteDemo}><Button type="submit" variant="ghost">Delete demo data</Button></form>
+          <form action={startDemo}><Button type="submit">{t("demo.start")}</Button></form>
+          <form action={deleteDemo}><Button type="submit" variant="ghost">{t("demo.delete")}</Button></form>
         </div>
       </Card>
-      <p className="text-xs text-muted">Audit log, data export and deletion controls are planned for Phase 2.</p>
+      <p className="text-xs text-muted">{t("settings.footer")}</p>
     </div>
   );
 }

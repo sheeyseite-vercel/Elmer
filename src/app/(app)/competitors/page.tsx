@@ -66,11 +66,11 @@ export default async function CompetitorsPage() {
         <Card className="space-y-3">
           <CardTitle>Latest public snapshots</CardTitle>
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[640px] text-left text-sm">
+            <table className="w-full min-w-[640px] text-start text-sm">
               <thead className="text-xs text-muted">
                 <tr>
-                  <th className="py-1 pr-3">Business</th><th className="pr-3">Rating</th><th className="pr-3">Reviews</th>
-                  <th className="pr-3">Categories</th><th className="pr-3">Checked</th><th>Source</th>
+                  <th className="py-1 pe-3">Business</th><th className="pe-3">Rating</th><th className="pe-3">Reviews</th>
+                  <th className="pe-3">Categories</th><th className="pe-3">Checked</th><th>Source</th>
                 </tr>
               </thead>
               <tbody>
@@ -78,18 +78,18 @@ export default async function CompetitorsPage() {
                   const s = latest.get(c.id);
                   return (
                     <tr key={c.id} className="border-t border-border align-top">
-                      <td className="py-2 pr-3">
+                      <td className="py-2 pe-3">
                         <Link href={`/competitors/${c.id}`} className="font-medium text-accent underline">{c.name}</Link>
-                        {c.kind === "own" && <span className="ml-2"><StatusBadge tone="success">Your listing</StatusBadge></span>}
+                        {c.kind === "own" && <span className="ms-2"><StatusBadge tone="success">Your listing</StatusBadge></span>}
                       </td>
                       {s ? (
                         <>
-                          <td className="pr-3">{s.rating ?? "—"}</td>
-                          <td className="pr-3">{s.reviewCount ?? "—"}</td>
-                          <td className="pr-3">{s.categories.length ? s.categories.join(", ") : "—"}</td>
-                          <td className="pr-3">
+                          <td className="pe-3">{s.rating ?? "—"}</td>
+                          <td className="pe-3">{s.reviewCount ?? "—"}</td>
+                          <td className="pe-3">{s.categories.length ? s.categories.join(", ") : "—"}</td>
+                          <td className="pe-3">
                             {s.checkedOn}
-                            {isStale(s.checkedOn, today) && <span className="ml-2"><StatusBadge tone="warning">Stale</StatusBadge></span>}
+                            {isStale(s.checkedOn, today) && <span className="ms-2"><StatusBadge tone="warning">Stale</StatusBadge></span>}
                           </td>
                           <td>
                             {s.sourceUrl ? (

@@ -140,16 +140,16 @@ export default async function GeoPage({ searchParams }: { searchParams: SP }) {
               <Card className="space-y-3">
                 <CardTitle>The same data as a table</CardTitle>
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left text-sm">
+                  <table className="w-full text-start text-sm">
                     <thead className="text-xs text-muted">
-                      <tr><th className="py-1 pr-3">Place</th><th className="pr-3">Result</th><th className="pr-3">Checked</th><th>Method</th></tr>
+                      <tr><th className="py-1 pe-3">Place</th><th className="pe-3">Result</th><th className="pe-3">Checked</th><th>Method</th></tr>
                     </thead>
                     <tbody>
                       {points.map((p) => (
                         <tr key={p.key} className="border-t border-border align-top">
-                          <td className="py-2 pr-3">{p.label}</td>
-                          <td className="pr-3">{p.position === null ? `Not found in top ${p.depth}` : `Position ${p.position}`}</td>
-                          <td className="pr-3">{formatMadrid(p.checkedAt)}</td>
+                          <td className="py-2 pe-3">{p.label}</td>
+                          <td className="pe-3">{p.position === null ? `Not found in top ${p.depth}` : `Position ${p.position}`}</td>
+                          <td className="pe-3">{formatMadrid(p.checkedAt)}</td>
                           <td>{p.methodology}</td>
                         </tr>
                       ))}

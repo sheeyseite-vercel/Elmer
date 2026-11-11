@@ -84,7 +84,7 @@
   --radius-card: var(--radius-md);
   --radius-sheet: var(--radius-lg);
   --shadow-card: var(--shadow-card);
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-sans: var(--font-inter), var(--font-arabic), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
 html {
@@ -147,3 +147,7 @@ body {
   aside, header, nav, .no-print { display: none !important; }
   body { background: #fff !important; color: #000 !important; }
 }
+
+html[lang="ar"] body { font-family: var(--font-arabic), var(--font-inter), ui-sans-serif, system-ui, sans-serif; }
+/* Maps, numbers and code stay left-to-right */
+.leaflet-container, code { direction: ltr; unicode-bidi: isolate; }

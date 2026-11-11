@@ -46,19 +46,19 @@ export default async function LeadsPage() {
           <Card className="space-y-3">
             <CardTitle>Totals by source</CardTitle>
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[520px] text-left text-sm">
+              <table className="w-full min-w-[520px] text-start text-sm">
                 <thead className="text-xs text-muted">
-                  <tr><th className="py-1 pr-3">Source</th><th className="pr-3">Calls</th><th className="pr-3">Inquiries</th><th className="pr-3">Bookings</th><th>Bookings per inquiry</th></tr>
+                  <tr><th className="py-1 pe-3">Source</th><th className="pe-3">Calls</th><th className="pe-3">Inquiries</th><th className="pe-3">Bookings</th><th>Bookings per inquiry</th></tr>
                 </thead>
                 <tbody>
                   {[...sources.map((s) => ({ key: s, label: SOURCES[s], list: entries.filter((e) => e.source === s) })), { key: "all", label: "All sources", list: entries }].map((r) => {
                     const t = totals(r.list);
                     return (
                       <tr key={r.key} className={r.key === "all" ? "border-t-2 border-border font-medium" : "border-t border-border"}>
-                        <td className="py-2 pr-3">{r.label}</td>
-                        <td className="pr-3">{show(t.calls)}</td>
-                        <td className="pr-3">{show(t.inquiries)}</td>
-                        <td className="pr-3">{show(t.bookings)}</td>
+                        <td className="py-2 pe-3">{r.label}</td>
+                        <td className="pe-3">{show(t.calls)}</td>
+                        <td className="pe-3">{show(t.inquiries)}</td>
+                        <td className="pe-3">{show(t.bookings)}</td>
                         <td>{pct(conversion(r.list))}</td>
                       </tr>
                     );

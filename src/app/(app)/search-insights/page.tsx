@@ -91,16 +91,16 @@ export default async function SearchInsightsPage({ searchParams }: { searchParam
           <Card className="space-y-3">
             <CardTitle>Phrases</CardTitle>
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[480px] text-left text-sm">
+              <table className="w-full min-w-[480px] text-start text-sm">
                 <thead className="text-xs text-muted">
-                  <tr><th className="py-1 pr-3">Phrase</th><th className="pr-3">Count</th><th className="pr-3">Group (estimate)</th><th>Target keyword?</th></tr>
+                  <tr><th className="py-1 pe-3">Phrase</th><th className="pe-3">Count</th><th className="pe-3">Group (estimate)</th><th>Target keyword?</th></tr>
                 </thead>
                 <tbody>
                   {rows.map((r) => (
                     <tr key={r.id} className="border-t border-border">
-                      <td className="py-2 pr-3">{r.phrase}</td>
-                      <td className="pr-3">{r.impressions !== null ? fmt(r.impressions) : r.belowThreshold ? "<15" : "—"}</td>
-                      <td className="pr-3">{KIND_LABEL[classify(r.phrase, ctx)]}</td>
+                      <td className="py-2 pe-3">{r.phrase}</td>
+                      <td className="pe-3">{r.impressions !== null ? fmt(r.impressions) : r.belowThreshold ? "<15" : "—"}</td>
+                      <td className="pe-3">{KIND_LABEL[classify(r.phrase, ctx)]}</td>
                       <td>{matchesTarget(r.phrase, targets) ? "Same as a keyword you track" : ""}</td>
                     </tr>
                   ))}

@@ -90,15 +90,15 @@ export function DailyBars({
       <details className="text-sm">
         <summary className="min-h-11 cursor-pointer py-2 text-accent">View values as a table</summary>
         <div className="max-h-64 overflow-auto">
-          <table className="w-full text-left text-xs">
+          <table className="w-full text-start text-xs">
             <thead className="text-muted">
-              <tr><th className="py-1 pr-3">Date</th><th className="pr-3">Value</th><th>Source</th></tr>
+              <tr><th className="py-1 pe-3">Date</th><th className="pe-3">Value</th><th>Source</th></tr>
             </thead>
             <tbody>
               {points.filter((p) => p.value !== null).map((p) => (
                 <tr key={p.date} className="border-t border-border">
-                  <td className="py-1 pr-3">{p.date}</td>
-                  <td className="pr-3">{p.value}</td>
+                  <td className="py-1 pe-3">{p.date}</td>
+                  <td className="pe-3">{p.value}</td>
                   <td>{p.source === "manual" ? "Manually entered" : "Imported CSV"}</td>
                 </tr>
               ))}

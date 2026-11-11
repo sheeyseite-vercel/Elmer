@@ -5,7 +5,7 @@ import { LogOut } from "lucide-react";
 import { clientAuth } from "@/lib/firebase/client";
 import { Button } from "@/components/ui/button";
 
-export function SignOutButton() {
+export function SignOutButton({ label }: { label: string }) {
   return (
     <Button
       variant="ghost"
@@ -16,7 +16,7 @@ export function SignOutButton() {
         window.location.assign("/login");
       }}
     >
-      <LogOut size={18} aria-hidden /> Sign out
+      <LogOut size={18} aria-hidden /> {label}
     </Button>
   );
 }

@@ -61,6 +61,12 @@ Only variables prefixed `NEXT_PUBLIC_` reach the browser. Never prefix a secret.
 
 Top-level collections, each business-scoped by `businessId`: `business_profiles` (with `ownerUid`, `memberUids`), `data_sources`, `performance_metrics`, `search_terms`, `tracked_keywords`, `rank_checks`, `competitors`, `competitor_snapshots`, `reviews`, `profile_tasks`, `lead_aggregates`, `ai_reports`, `imports`, `audit_logs`. Only `business_profiles` and `audit_logs` are written in Phase 1. Audit logs store field names, never values or secrets. No patient or health data is collected.
 
+## Map data
+
+The geographic visibility page uses Leaflet with OpenStreetMap tiles (no account, no cost, attribution shown on the map).
+OpenStreetMap's public tile servers have a usage policy meant for light use, which fits a single-owner app. If traffic grows,
+switch to a tile provider with a plan that allows it and update the URL in `src/components/map/geo-map.tsx`.
+
 ## Troubleshooting
 
 - "Firebase Admin is not configured": check the three `FIREBASE_ADMIN_*` values and that the private key keeps its `\n` sequences.

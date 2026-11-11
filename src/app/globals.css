@@ -122,3 +122,23 @@ body {
   animation-duration: 0.001ms !important;
   transition-duration: 0.001ms !important;
 }
+
+/* ---------- Map pins (Leaflet divIcons). Shape + number carry meaning, not colour alone. ---------- */
+.elmer-pin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 9999px;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.5);
+  color: #0b0d10;
+  font: 700 13px/1 system-ui, sans-serif;
+}
+.elmer-pin.search { border-radius: 8px; }
+.elmer-pin.top3 { background: #4cc38a; }
+.elmer-pin.mid { background: #e8b04a; }
+.elmer-pin.low { background: #ef6b6b; }
+.elmer-pin.none { background: #aab2bd; }
+.elmer-pin.clinic { background: #8aa4ff; border-radius: 6px; font-size: 16px; }

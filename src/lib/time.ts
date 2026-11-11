@@ -28,5 +28,8 @@ export function nowMadridLocal(): string {
   return `${g("year")}-${g("month")}-${g("day")}T${g("hour")}:${g("minute")}`;
 }
 
-export const formatMadrid =(iso: string) =>
+/** Calendar day (YYYY-MM-DD) of an instant, in Madrid time. */
+export const madridDay = (iso: string) => new Date(iso).toLocaleDateString("en-CA", { timeZone: TZ });
+
+export const formatMadrid = (iso: string) =>
   new Date(iso).toLocaleString("en-GB", { timeZone: TZ, dateStyle: "medium", timeStyle: "short" });

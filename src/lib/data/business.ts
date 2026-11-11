@@ -11,7 +11,10 @@ const load = cache(async (uid: string, real: boolean): Promise<BusinessProfile |
   const snap = await adminDb().collection("business_profiles").where("memberUids", "array-contains", uid).limit(5).get();
   const all = snap.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<BusinessProfile, "id">) }));
   const wantDemo = !real && (await cookies()).get(DEMO_COOKIE)?.value === "1";
-  return (wantDemo ? all.find((b) => b.isDemo === true) : all.find((b) => b.isDemo !== true)) ?? null;
+  const demo = wantDemo ? all.find((b) => b.isDemo === true) : undefined;
+  // A leftover demo cookie with no demo data (e.g. it was deleted or is being reset) falls back to the
+  // real business instead of sending the owner back to onboarding. Real and demo data are never mixed.
+  return demo ?? all.find((b) => b.isDemo !== true) ?? null;
 });
 
 /**

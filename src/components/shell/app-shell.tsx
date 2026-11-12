@@ -24,7 +24,7 @@ export async function AppShell({ businessName, children }: { businessName: strin
           <Sidebar labels={labels} />
         </div>
         <div className="flex items-center gap-1">
-          <div className="min-w-0 flex-1"><SignOutButton label={t("auth.signOut")} /></div>
+          <div className="min-w-0 flex-1">{process.env.REQUIRE_LOGIN === "1" && <SignOutButton label={t("auth.signOut")} />}</div>
           <ThemeToggle label={t("theme.toggle")} />
         </div>
       </aside>

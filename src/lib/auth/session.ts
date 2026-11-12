@@ -2,11 +2,31 @@ import "server-only";
 import { cache } from "react";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { adminAuth } from "@/lib/firebase/admin";
+import { adminAuth, adminDb } from "@/lib/firebase/admin";
 import { DEVICE_COOKIE, readDeviceToken } from "@/lib/auth/device";
 
 export const SESSION_COOKIE = "__session";
 export const SESSION_MAX_AGE_MS = 1000 * 60 * 60 * 24 * 5; // 5 days
+
+/**
+ * Sign-in is switched off: the app opens straight to the dashboard as the single owner.
+ * Set REQUIRE_LOGIN=1 in Vercel to bring the sign-in screen back (all the sign-in code is kept).
+ */
+export const loginRequired = () => process.env.REQUIRE_LOGIN === "1";
+
+/** The existing owner is whoever already belongs to the real (non-demo) business, so no data is orphaned. */
+const soleOwner = cache(async (): Promise<SessionUser> => {
+  const email = (process.env.OWNER_EMAILS ?? "").split(",")[0]?.trim() || null;
+  try {
+    const snap = await adminDb().collection("business_profiles").limit(20).get();
+    const real = snap.docs.find((d) => d.data().isDemo !== true);
+    const uid = (real?.data().memberUids as string[] | undefined)?.[0];
+    if (uid) return { uid, email };
+  } catch {
+    // fall through to the default owner id
+  }
+  return { uid: "owner", email };
+});
 
 export type SessionUser = { uid: string; email: string | null };
 
@@ -27,6 +47,7 @@ export function isEmailAllowed(email: string | undefined | null): boolean {
  * cache() makes the layout and the page share one check per request.
  */
 export const getSessionUser = cache(async (): Promise<SessionUser | null> => {
+  if (!loginRequired()) return soleOwner();
   const jar = await cookies();
   const cookie = jar.get(SESSION_COOKIE)?.value;
   if (cookie) {

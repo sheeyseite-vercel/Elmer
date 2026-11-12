@@ -8,7 +8,7 @@ export const metadata = { title: "Sign in" };
 
 export default async function LoginPage() {
   const { tr } = await getT();
-  if (await getSessionUser()) redirect("/dashboard");
+  if (process.env.REQUIRE_LOGIN !== "1" || (await getSessionUser())) redirect("/dashboard");
   return (
     <main className="mx-auto flex min-h-dvh max-w-sm flex-col justify-center gap-6 px-4 py-10">
       <div>

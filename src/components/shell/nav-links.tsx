@@ -25,12 +25,19 @@ function Item({ item, active, compact, label }: { item: NavItem; active: boolean
       href={item.href}
       aria-current={active ? "page" : undefined}
       className={cn(
-        "flex items-center gap-3 rounded-xl text-sm font-medium transition",
-        compact ? "min-h-12 flex-1 flex-col justify-center gap-0.5 px-1 text-[11px]" : "min-h-11 px-3",
-        active ? "bg-surface-2 text-text" : "text-muted hover:bg-surface-2 hover:text-text",
+        "relative flex items-center gap-3 text-sm font-medium transition",
+        compact ? "min-h-12 flex-1 flex-col justify-center gap-0.5 px-1 text-[11px]" : "min-h-11 rounded-lg px-3",
+        active ? "text-text" : "text-muted hover:text-text",
+        !compact && (active ? "bg-surface-2" : "hover:bg-surface-2/60"),
       )}
     >
-      <Icon size={compact ? 20 : 18} aria-hidden />
+      {active && (
+        <span
+          aria-hidden
+          className={cn("absolute bg-primary", compact ? "inset-x-3 top-0 h-0.5 rounded-b" : "inset-y-2 start-0 w-0.5 rounded-e")}
+        />
+      )}
+      <Icon size={compact ? 20 : 18} aria-hidden className={active ? "text-primary" : undefined} />
       <span className={compact ? "truncate" : ""}>{label}</span>
     </Link>
   );

@@ -151,7 +151,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: SP
             {r.cur.total === null ? (
               <p className="text-2xl font-semibold">No data yet</p>
             ) : (
-              <p className="text-3xl font-semibold tabular-nums">{fmtNum(r.cur.total)}</p>
+              <p className="font-display text-4xl font-semibold tabular-nums leading-none">{fmtNum(r.cur.total)}</p>
             )}
             <p className="text-xs text-muted">
               {r.cur.total === null ? "No values in this period." : `Total from ${r.cur.daysWithData} of ${r.cur.days} days with data`}

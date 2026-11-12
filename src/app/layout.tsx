@@ -1,11 +1,13 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Noto_Sans_Arabic } from "next/font/google";
+import { cookies } from "next/headers";
+import { Bricolage_Grotesque, Inter, Noto_Sans_Arabic } from "next/font/google";
 import "./globals.css";
 import { RegisterSW } from "@/components/pwa/register-sw";
 import { DIR } from "@/lib/i18n/dict";
 import { getT } from "@/lib/i18n/server";
 
 const inter = Inter({ subsets: ["latin", "latin-ext"], variable: "--font-inter", display: "swap" });
+const display = Bricolage_Grotesque({ subsets: ["latin", "latin-ext"], variable: "--font-display-latin", display: "swap" });
 const arabic = Noto_Sans_Arabic({ subsets: ["arabic"], variable: "--font-arabic", display: "swap" });
 
 export const metadata: Metadata = {
@@ -18,7 +20,10 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0e1013",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#eef2f5" },
+    { media: "(prefers-color-scheme: dark)", color: "#0a141c" },
+  ],
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
@@ -26,8 +31,14 @@ export const viewport: Viewport = {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const { locale, t } = await getT();
+  const theme = (await cookies()).get("elmer_theme")?.value;
   return (
-    <html lang={locale} dir={DIR[locale]} className={`${inter.variable} ${arabic.variable}`}>
+    <html
+      lang={locale}
+      dir={DIR[locale]}
+      data-theme={theme === "light" || theme === "dark" ? theme : undefined}
+      className={`${inter.variable} ${arabic.variable} ${display.variable}`}
+    >
       <body>
         <a
           href="#main"

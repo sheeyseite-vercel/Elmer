@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { SubmitButton } from "@/components/ui/submit-button";
 import { Card, CardTitle } from "@/components/ui/card";
+import { ThemeChoice } from "@/components/shell/theme";
 import { LOCALES, LOCALE_NAME } from "@/lib/i18n/dict";
 import { getT } from "@/lib/i18n/server";
 import { deleteDemo, resetDemo, startDemo } from "./demo/actions";
@@ -20,6 +21,12 @@ export default async function SettingsPage() {
   return (
     <div className="space-y-5">
       <h1 className="text-2xl font-semibold">{t("settings.title")}</h1>
+
+      <Card className="space-y-3">
+        <CardTitle>{t("theme.title")}</CardTitle>
+        <p className="text-sm text-muted">{t("theme.text")}</p>
+        <ThemeChoice labels={{ system: t("theme.system"), light: t("theme.light"), dark: t("theme.dark") }} />
+      </Card>
 
       <Card className="space-y-3">
         <CardTitle>{t("settings.lang")}</CardTitle>

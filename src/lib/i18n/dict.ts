@@ -48,6 +48,12 @@ const en = {
   "settings.aiText": "Gemini, Groq, OpenRouter or a custom provider, and which one is active.",
   "settings.lang": "Interface language",
   "settings.langText": "Changes the language of menus and labels. Your data, keywords and business names are never translated.",
+  "theme.title": "Appearance",
+  "theme.text": "Light, dark, or follow your phone.",
+  "theme.system": "Automatic",
+  "theme.light": "Light",
+  "theme.dark": "Dark",
+  "theme.toggle": "Switch between light and dark",
   "settings.footer": "Audit log, data export and deletion controls are planned for Phase 2.",
 } as const;
 
@@ -93,6 +99,12 @@ const ar: Record<Key, string> = {
   "settings.aiText": "Gemini أو Groq أو OpenRouter أو مزوّد مخصص، وتحديد المزوّد النشط.",
   "settings.lang": "لغة الواجهة",
   "settings.langText": "تغيّر لغة القوائم والعناوين. بياناتك وكلماتك المفتاحية وأسماء الأنشطة لا تُترجم أبداً.",
+  "theme.title": "المظهر",
+  "theme.text": "فاتح أو داكن أو حسب إعداد هاتفك.",
+  "theme.system": "تلقائي",
+  "theme.light": "فاتح",
+  "theme.dark": "داكن",
+  "theme.toggle": "التبديل بين الفاتح والداكن",
   "settings.footer": "سجل التدقيق وتصدير البيانات وحذفها مخطط لها في المرحلة 2.",
 };
 

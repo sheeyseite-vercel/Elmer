@@ -6,6 +6,7 @@ import { deleteSnapshot, setCompetitorStatus } from "./actions";
 import { useTr } from "@/lib/i18n/client";
 
 export function ArchiveButton({ id, status }: { id: string; status: "active" | "archived" }) {
+  const tr = useTr();
   const [pending, start] = useTransition();
   const [note, setNote] = useState<string | null>(null);
   return (
@@ -20,7 +21,7 @@ export function ArchiveButton({ id, status }: { id: string; status: "active" | "
       >
         {status === "active" ? tr("Archive") : tr("Restore")}
       </Button>
-      {note && <span role="status" className="text-xs text-muted">{note}</span>}
+      {note && <span role="status" className="text-xs text-muted">{tr(note)}</span>}
     </div>
   );
 }

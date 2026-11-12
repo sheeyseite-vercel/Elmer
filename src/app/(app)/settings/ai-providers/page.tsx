@@ -5,10 +5,12 @@ import { listProviders } from "@/lib/data/ai-providers";
 import { isEncryptionConfigured } from "@/lib/crypto";
 import { redirect } from "next/navigation";
 import { ProviderManager } from "./provider-manager";
+import { getT } from "@/lib/i18n/server";
 
 export const metadata = { title: "AI providers" };
 
 export default async function AiProvidersPage() {
+  const { tr } = await getT();
   const user = await requireUser();
   const business = await getBusinessForUser(user.uid);
   if (!business) redirect("/onboarding");
@@ -17,12 +19,9 @@ export default async function AiProvidersPage() {
   return (
     <div className="space-y-5">
       <div className="space-y-1">
-        <Link href="/settings" className="text-sm text-accent underline">← Settings</Link>
-        <h1 className="text-2xl font-semibold">AI providers</h1>
-        <p className="text-sm text-muted">
-          Add one or more providers and choose which one the AI analyst uses. Keys are encrypted on the server and are
-          never shown again after saving.
-        </p>
+        <Link href="/settings" className="text-sm text-accent underline">{tr("← Settings")}</Link>
+        <h1 className="text-2xl font-semibold">{tr("AI providers")}</h1>
+        <p className="text-sm text-muted">{tr("Add one or more providers and choose which one the AI analyst uses. Keys are encrypted on the server and are never shown again after saving.")}</p>
       </div>
       <ProviderManager providers={providers} encryptionReady={isEncryptionConfigured()} />
     </div>

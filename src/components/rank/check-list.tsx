@@ -5,9 +5,11 @@ import type { CheckView } from "@/lib/data/keywords";
 import { DEVICES, SURFACES } from "@/lib/schema/keywords";
 import { formatMadrid } from "@/lib/time";
 import { DeleteCheckButton } from "@/app/(app)/rank-checks/delete-check-button";
+import { getT } from "@/lib/i18n/server";
 
-export function CheckList({ checks, showKeyword }: { checks: CheckView[]; showKeyword?: boolean }) {
-  if (checks.length === 0) return <p className="text-sm text-muted">No rank checks recorded yet.</p>;
+export async function CheckList({ checks, showKeyword }: { checks: CheckView[]; showKeyword?: boolean }) {
+  const { tr } = await getT();
+  if (checks.length === 0) return <p className="text-sm text-muted">{tr("No rank checks recorded yet.")}</p>;
   return (
     <ul className="space-y-3">
       {checks.map((c) => (
@@ -16,22 +18,22 @@ export function CheckList({ checks, showKeyword }: { checks: CheckView[]; showKe
             {showKeyword && (
               <Link href={`/keywords/${c.keywordId}`} className="font-medium text-accent underline">{c.keyword}</Link>
             )}
-            <StatusBadge tone={c.position === null ? "warning" : "success"}>{positionText(c.position, c.depth)}</StatusBadge>
+            <StatusBadge tone={c.position === null ? "warning" : "success"}>{positionText(c.position, c.depth, tr)}</StatusBadge>
           </div>
           <p className="text-muted">
-            {formatMadrid(c.checkedAt)} · {SURFACES[c.surface]} · {DEVICES[c.device]} · {c.locationLabel}
+            {formatMadrid(c.checkedAt)} · {tr(SURFACES[c.surface])} · {tr(DEVICES[c.device])} · {c.locationLabel}
           </p>
           {c.competitors.length > 0 && (
             <p className="text-muted">
-              Competitors seen: {c.competitors.map((x) => (x.position ? `${x.name} (#${x.position})` : x.name)).join(", ")}
+              {tr("Competitors seen:")} {c.competitors.map((x) => (x.position ? `${x.name} (#${x.position})` : x.name)).join(", ")}
             </p>
           )}
           <p className="text-muted">
-            Source: manually recorded · Method: {c.methodology}
+            {tr("Source: manually recorded")} · {tr("Method:")} {c.methodology}
             {c.referenceUrl && (
               <>
                 {" · "}
-                <a href={c.referenceUrl} target="_blank" rel="noopener noreferrer" className="text-accent underline">reference</a>
+                <a href={c.referenceUrl} target="_blank" rel="noopener noreferrer" className="text-accent underline">{tr("reference")}</a>
               </>
             )}
           </p>

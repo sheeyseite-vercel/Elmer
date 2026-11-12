@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { EmptyState } from "@/components/ui/empty-state";
 import { StatusBadge } from "@/components/ui/badges";
 import { MODULES } from "@/lib/modules";
+import { getT } from "@/lib/i18n/server";
 
 export async function generateMetadata({ params }: { params: Promise<{ module: string }> }) {
   const { module } = await params;
@@ -10,6 +11,7 @@ export async function generateMetadata({ params }: { params: Promise<{ module: s
 }
 
 export default async function ModulePage({ params }: { params: Promise<{ module: string }> }) {
+  const { tr } = await getT();
   const { module } = await params;
   const info = MODULES[module];
   if (!info) notFound();
@@ -18,16 +20,14 @@ export default async function ModulePage({ params }: { params: Promise<{ module:
     <div className="space-y-5">
       <div className="space-y-1">
         <div className="flex flex-wrap items-center gap-2">
-          <h1 className="text-2xl font-semibold">{info.title}</h1>
-          <StatusBadge tone="warning">Planned · Phase {info.phase}</StatusBadge>
+          <h1 className="text-2xl font-semibold">{tr(info.title)}</h1>
+          <StatusBadge tone="warning">{tr("Planned")} · {tr("Phase {n}", { n: info.phase })}</StatusBadge>
         </div>
-        <p className="text-sm text-muted">{info.blurb}</p>
+        <p className="text-sm text-muted">{tr(info.blurb)}</p>
       </div>
-      <EmptyState>{info.empty}</EmptyState>
+      <EmptyState title={tr("No data yet")}>{tr(info.empty)}</EmptyState>
       {module === "settings" && (
-        <Link href="/onboarding" className="inline-flex min-h-11 items-center text-sm font-medium text-accent underline">
-          Edit business details
-        </Link>
+        <Link href="/onboarding" className="inline-flex min-h-11 items-center text-sm font-medium text-accent underline">{tr("Edit business details")}</Link>
       )}
     </div>
   );

@@ -9,10 +9,12 @@ import { getReport } from "@/lib/data/reports";
 import { formatMadrid } from "@/lib/time";
 import { DeleteReportButton } from "./delete-report";
 import { PrintButton } from "./print-button";
+import { getT } from "@/lib/i18n/server";
 
 export const metadata = { title: "Report" };
 
 export default async function ReportPage({ params }: { params: Promise<{ id: string }> }) {
+  const { tr } = await getT();
   const { id } = await params;
   const user = await requireUser();
   const business = await getBusinessForUser(user.uid);
@@ -24,14 +26,14 @@ export default async function ReportPage({ params }: { params: Promise<{ id: str
   return (
     <div className="space-y-5">
       <div className="space-y-1">
-        <Link href="/reports" className="no-print inline-flex min-h-11 items-center text-sm text-accent underline">← All reports</Link>
-        <h1 className="text-2xl font-semibold">{report.kind === "ai_analysis" ? "AI analysis" : "Data summary"}</h1>
-        <p className="text-sm text-muted">Created {formatMadrid(report.createdAt)} · Period {f.period.from} to {f.period.to}</p>
+        <Link href="/reports" className="no-print inline-flex min-h-11 items-center text-sm text-accent underline">{tr("← All reports")}</Link>
+        <h1 className="text-2xl font-semibold">{report.kind === "ai_analysis" ? tr("AI analysis") : tr("Data summary")}</h1>
+        <p className="text-sm text-muted">{tr("Created")} {formatMadrid(report.createdAt)} · {tr("Period")} {f.period.from} → {f.period.to}</p>
       </div>
 
       <div className="no-print flex flex-wrap gap-2">
-        <a href={`/reports/${id}/export?format=csv`} className="inline-flex min-h-11 items-center rounded-xl border border-border px-3 text-sm">Download CSV</a>
-        <a href={`/reports/${id}/export?format=txt`} className="inline-flex min-h-11 items-center rounded-xl border border-border px-3 text-sm">Download text</a>
+        <a href={`/reports/${id}/export?format=csv`} className="inline-flex min-h-11 items-center rounded-xl border border-border px-3 text-sm">{tr("Download CSV")}</a>
+        <a href={`/reports/${id}/export?format=txt`} className="inline-flex min-h-11 items-center rounded-xl border border-border px-3 text-sm">{tr("Download text")}</a>
         <PrintButton />
         <DeleteReportButton id={id} />
       </div>
@@ -39,21 +41,21 @@ export default async function ReportPage({ params }: { params: Promise<{ id: str
       {report.kind === "ai_analysis" && (
         <Card className="space-y-2">
           <div className="flex flex-wrap items-center gap-2">
-            <CardTitle>Analysis</CardTitle>
-            <StatusBadge tone="warning">AI-generated · estimate</StatusBadge>
+            <CardTitle>{tr("Analysis")}</CardTitle>
+            <StatusBadge tone="warning">{tr("AI-generated · estimate")}</StatusBadge>
           </div>
-          {report.question && <p className="text-sm text-muted">Question: “{report.question}”</p>}
+          {report.question && <p className="text-sm text-muted">{tr("Question:")} “{report.question}”</p>}
           <p className="whitespace-pre-wrap text-sm leading-relaxed">{report.text}</p>
           <p className="text-xs text-muted">
-            Written by {report.providerLabel} ({report.model}) from the figures below. It may contain mistakes: check it against the numbers.
+            {tr("Written by {provider} from the figures below. It may contain mistakes: check it against the numbers.", { provider: `${report.providerLabel} (${report.model})` })}
           </p>
         </Card>
       )}
 
       <Card className="space-y-2">
-        <CardTitle>Data this report is based on</CardTitle>
+        <CardTitle>{tr("Data this report is based on")}</CardTitle>
         <pre className="whitespace-pre-wrap break-words font-sans text-sm leading-relaxed">{factsToText(f)}</pre>
-        <p className="text-xs text-muted">Source: data recorded in this app. “Not recorded” means no data, not zero.</p>
+        <p className="text-xs text-muted">{tr("Source: data recorded in this app. “Not recorded” means no data, not zero.")}</p>
       </Card>
     </div>
   );

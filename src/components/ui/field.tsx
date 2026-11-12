@@ -1,3 +1,6 @@
+"use client";
+
+import { useTr } from "@/lib/i18n/client";
 import { cn } from "@/lib/utils";
 import type { InputHTMLAttributes, SelectHTMLAttributes } from "react";
 
@@ -9,6 +12,7 @@ type FieldProps = {
 };
 
 function Wrapper({ label, name, hint, error, children }: FieldProps & { children: React.ReactNode }) {
+  const tr = useTr();
   const hintId = hint ? `${name}-hint` : undefined;
   const errId = error?.length ? `${name}-err` : undefined;
   return (
@@ -24,7 +28,7 @@ function Wrapper({ label, name, hint, error, children }: FieldProps & { children
       )}
       {error?.length ? (
         <p id={errId} role="alert" className="text-xs text-danger">
-          {error.join(" ")}
+          {error.map((x) => tr(x)).join(" ")}
         </p>
       ) : null}
     </div>

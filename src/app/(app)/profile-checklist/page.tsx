@@ -5,10 +5,12 @@ import { getBusinessForUser } from "@/lib/data/business";
 import { listTasks } from "@/lib/data/profile";
 import { HELP_URL, ITEMS } from "@/lib/profile-checklist";
 import { TaskRow } from "./task-row";
+import { getT } from "@/lib/i18n/server";
 
 export const metadata = { title: "Profile checklist" };
 
 export default async function ChecklistPage() {
+  const { tr } = await getT();
   const user = await requireUser();
   const business = await getBusinessForUser(user.uid);
   if (!business) redirect("/onboarding");
@@ -30,11 +32,10 @@ export default async function ChecklistPage() {
   return (
     <div className="space-y-5">
       <div className="space-y-1">
-        <h1 className="text-2xl font-semibold">Profile checklist</h1>
+        <h1 className="text-2xl font-semibold">{tr("Profile checklist")}</h1>
         <p className="text-sm text-muted">
           A practical list for keeping your Google Business Profile accurate. You set each status yourself; this app
-          cannot see or edit your live profile, and an item stays <strong>Unknown</strong> until you review it.
-        </p>
+          cannot see or edit your live profile, and an item stays <strong>{tr("Unknown")}</strong>{" "}{tr("until you review it.")}</p>
       </div>
 
       <Card className="space-y-1">
@@ -44,7 +45,7 @@ export default async function ChecklistPage() {
         <p className="text-xs text-muted">
           This is a to-do list, not a score, and finishing it does not promise higher rankings or more customers. For
           Google&apos;s own instructions, see the{" "}
-          <a href={HELP_URL} target="_blank" rel="noopener noreferrer" className="text-accent underline">Google Business Profile Help</a>.
+          <a href={HELP_URL} target="_blank" rel="noopener noreferrer" className="text-accent underline">{tr("Google Business Profile Help")}</a>.
         </p>
       </Card>
 

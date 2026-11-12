@@ -11,6 +11,7 @@ import { formatMadrid } from "@/lib/time";
 import { cn } from "@/lib/utils";
 import { KeywordForm } from "./keyword-form";
 import { StatusButtons } from "./status-buttons";
+import { getT } from "@/lib/i18n/server";
 
 export const metadata = { title: "Keywords" };
 
@@ -23,6 +24,7 @@ const FILTERS: { value: KeywordStatus | "all"; label: string }[] = [
 ];
 
 export default async function KeywordsPage({ searchParams }: { searchParams: SP }) {
+  const { tr } = await getT();
   const sp = await searchParams;
   const raw = Array.isArray(sp.status) ? sp.status[0] : sp.status;
   const filter = FILTERS.find((f) => f.value === raw)?.value ?? "active";
@@ -39,24 +41,19 @@ export default async function KeywordsPage({ searchParams }: { searchParams: SP 
   return (
     <div className="space-y-5">
       <div className="space-y-1">
-        <h1 className="text-2xl font-semibold">Keyword tracker</h1>
+        <h1 className="text-2xl font-semibold">{tr("Keyword tracker")}</h1>
         <p className="text-sm text-muted">
-          These are <strong>target keywords you chose</strong>. They are not search phrases reported by Google; those
-          appear on Search insights only when they come from an authorised report. One rank change does not establish a
-          lasting trend.
-        </p>
+          These are <strong>{tr("target keywords you chose")}</strong>{tr(". They are not search phrases reported by Google; those appear on Search insights only when they come from an authorised report. One rank change does not establish a lasting trend.")}</p>
       </div>
 
       <details className="rounded-card" open={keywords.length === 0}>
-        <summary className="flex min-h-11 cursor-pointer items-center rounded-xl border border-border bg-surface px-4 text-sm font-medium">
-          Add a keyword
-        </summary>
+        <summary className="flex min-h-11 cursor-pointer items-center rounded-xl border border-border bg-surface px-4 text-sm font-medium">{tr("Add a keyword")}</summary>
         <div className="mt-3">
           <KeywordForm />
         </div>
       </details>
 
-      <nav aria-label="Status filter" className="flex flex-wrap gap-2">
+      <nav aria-label={tr("Status filter")} className="flex flex-wrap gap-2">
         {FILTERS.map((f) => (
           <Link
             key={f.value}
@@ -67,16 +64,16 @@ export default async function KeywordsPage({ searchParams }: { searchParams: SP 
               filter === f.value ? "border-primary bg-surface-2" : "border-border text-muted hover:text-text",
             )}
           >
-            {f.label}
+            {tr(f.label)}
           </Link>
         ))}
       </nav>
 
       {shown.length === 0 ? (
         <Card className="text-center">
-          <p className="text-lg font-semibold">No data yet</p>
+          <p className="text-lg font-semibold">{tr("No data yet")}</p>
           <p className="mt-1 text-sm text-muted">
-            {keywords.length === 0 ? "Add your first target keyword above, for example “osteópata”." : "No keywords with this status."}
+            {keywords.length === 0 ? tr("Add your first target keyword above, for example “osteópata”.") : tr("No keywords with this status.")}
           </p>
         </Card>
       ) : (
@@ -89,18 +86,18 @@ export default async function KeywordsPage({ searchParams }: { searchParams: SP 
                 <Card className="space-y-2">
                   <div className="flex flex-wrap items-center gap-2">
                     <Link href={`/keywords/${k.id}`} className="text-base font-semibold text-accent underline">{k.term}</Link>
-                    <StatusBadge tone={k.status === "active" ? "success" : k.status === "paused" ? "warning" : "neutral"}>{k.status}</StatusBadge>
+                    <StatusBadge tone={k.status === "active" ? "success" : k.status === "paused" ? "warning" : "neutral"}>{tr(k.status === "active" ? "Active" : k.status === "paused" ? "Paused" : "Archived")}</StatusBadge>
                   </div>
                   <p className="text-sm text-muted">
-                    {k.language === "es" ? "Español" : "English"} · {SURFACES[k.surface]}
+                    {k.language === "es" ? "Español" : "English"} · {tr(SURFACES[k.surface])}
                     {k.targetArea ? ` · ${k.targetArea}` : ""}
-                    {k.group ? ` · Group: ${k.group}` : ""}
+                    {k.group ? ` · ${tr("Group:")} ${k.group}` : ""}
                     {k.tags.length ? ` · ${k.tags.join(", ")}` : ""}
                   </p>
                   <p className="text-sm text-muted">
                     {last
-                      ? `${list.length} check${list.length === 1 ? "" : "s"} · latest ${formatMadrid(last.checkedAt)}: ${positionText(last.position, last.depth)}`
-                      : "No checks recorded yet."}
+                      ? `${tr("{n} checks", { n: list.length })} · ${tr("latest")} ${formatMadrid(last.checkedAt)}: ${positionText(last.position, last.depth, tr)}`
+                      : tr("No checks recorded yet.")}
                   </p>
                   <StatusButtons id={k.id} status={k.status} />
                 </Card>

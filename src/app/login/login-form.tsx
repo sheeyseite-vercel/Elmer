@@ -6,16 +6,17 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { TextField } from "@/components/ui/field";
 import { clientAuth, isClientConfigured } from "@/lib/firebase/client";
+import { useTr } from "@/lib/i18n/client";
 
 export function LoginForm() {
+  const tr = useTr();
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   if (!isClientConfigured()) {
     return (
       <Card role="alert">
-        Firebase is not configured. Add the NEXT_PUBLIC_FIREBASE_* variables to <code>.env.local</code> (see README).
-      </Card>
+        Firebase is not configured. Add the NEXT_PUBLIC_FIREBASE_* variables to <code>{tr(".env.local")}</code>{" "}{tr("(see README).")}</Card>
     );
   }
 
@@ -61,11 +62,9 @@ export function LoginForm() {
           });
         }}
       >
-        <TextField label="Email" name="email" type="email" autoComplete="email" required />
-        <TextField label="Password" name="password" type="password" autoComplete="current-password" required />
-        <Button type="submit" className="w-full" disabled={busy}>
-          Sign in
-        </Button>
+        <TextField label={tr("Email")} name="email" type="email" autoComplete="email" required />
+        <TextField label={tr("Password")} name="password" type="password" autoComplete="current-password" required />
+        <Button type="submit" className="w-full" disabled={busy}>{tr("Sign in")}</Button>
       </form>
       <Button
         type="button"
@@ -78,9 +77,7 @@ export function LoginForm() {
             return cred.user.getIdToken();
           })
         }
-      >
-        Continue with Google
-      </Button>
+      >{tr("Continue with Google")}</Button>
       {error && (
         <p role="alert" className="text-sm text-danger">
           {error}

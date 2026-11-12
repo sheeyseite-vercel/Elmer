@@ -1,3 +1,7 @@
+/** Text goes through tr() so pages can show it in the reader's language; the default is English. */
+export type TrFn = (text: string, vars?: Record<string, string | number>) => string;
+const en: TrFn = (t, v) => (v ? t.replace(/\{(\w+)\}/g, (m, k: string) => (k in v ? String(v[k]) : m)) : t);
+
 export type CheckLite = {
   id: string;
   checkedAt: string; // ISO
@@ -27,7 +31,7 @@ const day = (iso: string) => iso.slice(0, 10);
  * For every like-for-like group with at least two checks, compares the newest check with the one
  * before it. A lower position number is better. This describes two observations, not a trend.
  */
-export function describeChanges(checks: CheckLite[]): Change[] {
+export function describeChanges(checks: CheckLite[], tr: TrFn = en): Change[] {
   const groups = new Map<string, CheckLite[]>();
   for (const c of checks) groups.set(groupKey(c), [...(groups.get(groupKey(c)) ?? []), c]);
 
@@ -42,19 +46,19 @@ export function describeChanges(checks: CheckLite[]): Change[] {
 
     if (cur.position !== null && prev.position !== null) {
       const delta = prev.position - cur.position;
-      if (delta > 0) out.push({ ...base, kind: "improved", text: `Position ${prev.position} → ${cur.position} (${delta} higher), ${span}` });
-      else if (delta < 0) out.push({ ...base, kind: "declined", text: `Position ${prev.position} → ${cur.position} (${-delta} lower), ${span}` });
-      else out.push({ ...base, kind: "unchanged", text: `Position ${cur.position} in both checks, ${span}` });
+      if (delta > 0) out.push({ ...base, kind: "improved", text: tr("Position {a} → {b} ({n} higher), {span}", { a: prev.position, b: cur.position, n: delta, span }) });
+      else if (delta < 0) out.push({ ...base, kind: "declined", text: tr("Position {a} → {b} ({n} lower), {span}", { a: prev.position, b: cur.position, n: -delta, span }) });
+      else out.push({ ...base, kind: "unchanged", text: tr("Position {a} in both checks, {span}", { a: cur.position, span }) });
     } else if (cur.position !== null) {
-      out.push({ ...base, kind: "found", text: `Found at position ${cur.position}; the earlier check did not find it in the top ${prev.depth}, ${span}` });
+      out.push({ ...base, kind: "found", text: tr("Found at position {a}; the earlier check did not find it in the top {d}, {span}", { a: cur.position, d: prev.depth, span }) });
     } else if (prev.position !== null) {
-      out.push({ ...base, kind: "lost", text: `Not found in the top ${cur.depth}; the earlier check had it at position ${prev.position}, ${span}` });
+      out.push({ ...base, kind: "lost", text: tr("Not found in the top {d}; the earlier check had it at position {a}, {span}", { d: cur.depth, a: prev.position, span }) });
     } else {
-      out.push({ ...base, kind: "both_missing", text: `Not found in either check (top ${prev.depth} and top ${cur.depth}), ${span}` });
+      out.push({ ...base, kind: "both_missing", text: tr("Not found in either check (top {a} and top {b}), {span}", { a: prev.depth, b: cur.depth, span }) });
     }
   }
   return out.sort((a, b) => a.key.localeCompare(b.key));
 }
 
-export const positionText = (position: number | null, depth: number) =>
-  position === null ? `Not found in top ${depth} checked` : `Position ${position}`;
+export const positionText = (position: number | null, depth: number, tr: TrFn = en) =>
+  position === null ? tr("Not found in top {d} checked", { d: depth }) : tr("Position {p}", { p: position });

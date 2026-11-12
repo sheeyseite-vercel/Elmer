@@ -9,6 +9,7 @@ import { requireUser } from "@/lib/auth/session";
 import { getBusinessForUser } from "@/lib/data/business";
 import { listChecks, listKeywords } from "@/lib/data/keywords";
 import { formatMadrid, madridDay } from "@/lib/time";
+import { getT } from "@/lib/i18n/server";
 
 export const metadata = { title: "Geographic visibility" };
 
@@ -18,6 +19,7 @@ const selectClass = "mt-1 block min-h-11 w-full rounded-xl border border-border 
 const SURFACE_LABEL = { maps: "Google Maps", search: "Google Search" } as const;
 
 export default async function GeoPage({ searchParams }: { searchParams: SP }) {
+  const { tr } = await getT();
   const sp = await searchParams;
   const user = await requireUser();
   const business = await getBusinessForUser(user.uid);
@@ -48,7 +50,7 @@ export default async function GeoPage({ searchParams }: { searchParams: SP }) {
       checkedAtText: formatMadrid(p.checkedAt), methodology: p.methodology, checksAtPoint: p.checksAtPoint,
     })),
     surface,
-    surfaceLabel: SURFACE_LABEL[surface],
+    surfaceLabel: tr(SURFACE_LABEL[surface]),
     keyword: keyword?.term ?? "",
   };
   const withoutCoords = checks.length - located.length;
@@ -56,99 +58,89 @@ export default async function GeoPage({ searchParams }: { searchParams: SP }) {
   return (
     <div className="space-y-5">
       <div className="space-y-1">
-        <h1 className="text-2xl font-semibold">Geographic visibility</h1>
-        <p className="text-sm text-muted">
-          Your recorded rank checks placed on a map. Each pin is one observation at one place and time. A handful of
-          points does not represent what every searcher sees.
-        </p>
+        <h1 className="text-2xl font-semibold">{tr("Geographic visibility")}</h1>
+        <p className="text-sm text-muted">{tr("Your recorded rank checks placed on a map. Each pin is one observation at one place and time. A handful of points does not represent what every searcher sees.")}</p>
       </div>
 
       {!keyword ? (
         <EmptyState>
-          Add a target keyword on the <Link href="/keywords" className="text-accent underline">Keywords page</Link>, then
-          record rank checks with latitude and longitude on <Link href="/rank-checks" className="text-accent underline">Rank checks</Link>.
+          Add a target keyword on the <Link href="/keywords" className="text-accent underline">{tr("Keywords page")}</Link>, then
+          record rank checks with latitude and longitude on <Link href="/rank-checks" className="text-accent underline">{tr("Rank checks")}</Link>.
         </EmptyState>
       ) : (
         <>
           <Card>
             <form method="get" action="/geo-visibility" className="grid gap-3 sm:grid-cols-3 lg:grid-cols-6 sm:items-end">
               <label className="text-xs text-muted sm:col-span-3 lg:col-span-2">
-                Keyword
+                {tr("Keyword")}
                 <select name="keyword" defaultValue={keywordId} className={selectClass}>
                   {usable.map((k) => <option key={k.id} value={k.id}>{k.term}</option>)}
                 </select>
               </label>
               <label className="text-xs text-muted">
-                Surface
+                {tr("Surface")}
                 <select name="surface" defaultValue={surface} className={selectClass}>
-                  <option value="maps">Google Maps</option>
-                  <option value="search">Google Search</option>
+                  <option value="maps">{tr("Google Maps")}</option>
+                  <option value="search">{tr("Google Search")}</option>
                 </select>
               </label>
               <label className="text-xs text-muted">
-                Device
+                {tr("Device")}
                 <select name="device" defaultValue={device} className={selectClass}>
-                  <option value="mobile">Mobile</option>
-                  <option value="desktop">Desktop</option>
+                  <option value="mobile">{tr("Mobile")}</option>
+                  <option value="desktop">{tr("Desktop")}</option>
                 </select>
               </label>
               <label className="text-xs text-muted">
-                From
+                {tr("From")}
                 <input type="date" name="from" defaultValue={from} className={selectClass} />
               </label>
               <label className="text-xs text-muted">
-                To
+                {tr("To")}
                 <input type="date" name="to" defaultValue={to} max={madridDay(new Date().toISOString())} className={selectClass} />
               </label>
-              <button type="submit" className="min-h-11 rounded-xl border border-border bg-surface-2 px-4 text-sm font-medium">Apply</button>
+              <button type="submit" className="min-h-11 rounded-xl border border-border bg-surface-2 px-4 text-sm font-medium">{tr("Apply")}</button>
             </form>
-            <p className="mt-2 text-xs text-muted">
-              Keyword, surface and device are chosen one at a time so a map never mixes results that cannot be compared.
-            </p>
+            <p className="mt-2 text-xs text-muted">{tr("Keyword, surface and device are chosen one at a time so a map never mixes results that cannot be compared.")}</p>
           </Card>
 
           {!hasClinic && (
             <p className="text-sm text-warning">
-              Your clinic location is not set, so it is not marked. Add latitude and longitude in{" "}
-              <Link href="/onboarding" className="underline">business details</Link>.
+              {tr("Your clinic location is not set, so it is not marked. Add latitude and longitude in")}{" "}
+              <Link href="/onboarding" className="underline">{tr("business details")}</Link>.
             </p>
           )}
 
           {points.length === 0 ? (
             <EmptyState>
-              No located checks match these filters. {withoutCoords > 0 ? `${withoutCoords} recorded checks have no coordinates and cannot be placed. ` : ""}
-              Record a rank check with latitude and longitude on the{" "}
-              <Link href="/rank-checks" className="text-accent underline">Rank checks page</Link>. No heatmap is drawn
-              without real location-based checks.
-            </EmptyState>
+              {tr("No located checks match these filters.")} {withoutCoords > 0 ? tr("{n} recorded checks have no coordinates and cannot be placed.", { n: withoutCoords }) + " " : ""}
+              {tr("Record a rank check with latitude and longitude on the")}{" "}
+              <Link href="/rank-checks" className="text-accent underline">{tr("Rank checks page")}</Link>{tr(". No heatmap is drawn without real location-based checks.")}</EmptyState>
           ) : (
             <>
               <GeoMap data={map} />
               <Card className="space-y-2">
-                <CardTitle>How to read the pins</CardTitle>
+                <CardTitle>{tr("How to read the pins")}</CardTitle>
                 <ul className="flex flex-wrap gap-2 text-xs">
                   {(Object.keys(BAND_TEXT) as (keyof typeof BAND_TEXT)[]).map((b) => (
                     <li key={b}><StatusBadge tone={b === "top3" ? "success" : b === "mid" ? "warning" : b === "low" ? "danger" : "neutral"}>{BAND_TEXT[b]}</StatusBadge></li>
                   ))}
                 </ul>
-                <p className="text-xs text-muted">
-                  The number inside a pin is the position observed (– means not found). Round pins are Google Maps checks;
-                  square pins are Google Search checks. The star is your clinic.
-                </p>
+                <p className="text-xs text-muted">{tr("The number inside a pin is the position observed (– means not found). Round pins are Google Maps checks; square pins are Google Search checks. The star is your clinic.")}</p>
               </Card>
 
               <Card className="space-y-3">
-                <CardTitle>The same data as a table</CardTitle>
+                <CardTitle>{tr("The same data as a table")}</CardTitle>
                 <div className="overflow-x-auto">
                   <table className="w-full text-start text-sm">
                     <thead className="text-xs text-muted">
-                      <tr><th className="py-1 pe-3">Place</th><th className="pe-3">Result</th><th className="pe-3">Checked</th><th>Method</th></tr>
+                      <tr><th className="py-1 pe-3">{tr("Place")}</th><th className="pe-3">{tr("Result")}</th><th className="pe-3">{tr("Checked")}</th><th>{tr("Method")}</th></tr>
                     </thead>
                     <tbody>
                       {points.map((p) => (
                         <tr key={p.key} className="border-t border-border align-top">
                           <td className="py-2 pe-3">{p.label}</td>
-                          <td className="pe-3">{p.position === null ? `Not found in top ${p.depth}` : `Position ${p.position}`}</td>
+                          <td className="pe-3">{p.position === null ? tr("Not found in top {d}", { d: p.depth }) : tr("Position {p}", { p: p.position })}</td>
                           <td className="pe-3">{formatMadrid(p.checkedAt)}</td>
                           <td>{p.methodology}</td>
                         </tr>
@@ -157,8 +149,8 @@ export default async function GeoPage({ searchParams }: { searchParams: SP }) {
                   </table>
                 </div>
                 <p className="text-xs text-muted">
-                  Source: manually recorded checks. Where a place has several checks, only the newest is shown.
-                  {withoutCoords > 0 ? ` ${withoutCoords} checks without coordinates are not shown.` : ""}
+                  {tr("Source: manually recorded checks. Where a place has several checks, only the newest is shown.")}
+                  {withoutCoords > 0 ? ` ${tr("{n} checks without coordinates are not shown.", { n: withoutCoords })}` : ""}
                 </p>
               </Card>
             </>

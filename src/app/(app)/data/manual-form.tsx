@@ -32,7 +32,7 @@ export function ManualForm({ today }: { today: string }) {
         <TextField label={tr("Note (optional)")} name="note" maxLength={200} error={e.note} hint={tr("Do not enter patient names or health details.")} />
         {state.message && (
           <p role={state.ok ? "status" : "alert"} className={state.ok ? "text-sm text-success" : "text-sm text-danger"}>
-            {state.message}
+            {tr(state.message)}
           </p>
         )}
         <Button type="submit" className="w-full" disabled={pending}>{pending ? tr("Saving…") : tr("Save value")}</Button>

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
 import { SelectField, TextField } from "@/components/ui/field";
 import { saveBusinessProfile, type OnboardingState } from "./actions";
+import { useTr } from "@/lib/i18n/client";
 
 type Defaults = Record<string, string | undefined>;
 
@@ -22,6 +23,7 @@ const CANNOT = [
 ];
 
 export function OnboardingWizard({ defaults }: { defaults?: Defaults }) {
+  const tr = useTr();
   const [step, setStep] = useState(defaults ? 1 : 0);
   const [state, action, pending] = useActionState<OnboardingState, FormData>(saveBusinessProfile, {});
   const e = state.errors ?? {};
@@ -30,72 +32,70 @@ export function OnboardingWizard({ defaults }: { defaults?: Defaults }) {
   return (
     <div className="space-y-5">
       <div>
-        <p className="text-xs uppercase tracking-wider text-muted">Step {step + 1} of 2</p>
-        <h1 className="text-2xl font-semibold">{step === 0 ? "What this app can and cannot measure" : "Confirm your business details"}</h1>
+        <p className="text-xs uppercase tracking-wider text-muted">{tr("Step {n} of 2", { n: step + 1 })}</p>
+        <h1 className="text-2xl font-semibold">{step === 0 ? tr("What this app can and cannot measure") : tr("Confirm your business details")}</h1>
       </div>
 
       {step === 0 && (
         <>
           <Card>
-            <CardTitle>It can</CardTitle>
+            <CardTitle>{tr("It can")}</CardTitle>
             <ul className="mt-2 list-disc space-y-1.5 ps-5 text-sm text-muted">
-              {CAN.map((t) => <li key={t}>{t}</li>)}
+              {CAN.map((t) => <li key={t}>{tr(t)}</li>)}
             </ul>
           </Card>
           <Card>
-            <CardTitle>It cannot</CardTitle>
+            <CardTitle>{tr("It cannot")}</CardTitle>
             <ul className="mt-2 list-disc space-y-1.5 ps-5 text-sm text-muted">
-              {CANNOT.map((t) => <li key={t}>{t}</li>)}
+              {CANNOT.map((t) => <li key={t}>{tr(t)}</li>)}
             </ul>
           </Card>
-          <Button className="w-full" onClick={() => setStep(1)}>Continue</Button>
+          <Button className="w-full" onClick={() => setStep(1)}>{tr("Continue")}</Button>
         </>
       )}
 
       {/* Keep the form mounted-but-hidden is unnecessary; render only on step 1 */}
       {step === 1 && (
         <form action={action} className="space-y-4">
-          <p className="text-sm text-muted">
-            Enter only what you can confirm. Nothing is pre-filled or assumed; you can edit these later in Settings.
-          </p>
+          <p className="text-sm text-muted">{tr("Enter only what you can confirm. Nothing is pre-filled or assumed; you can edit these later in Settings.")}</p>
           <Card className="space-y-4">
-            <TextField label="Business name" name="name" required defaultValue={d.name ?? "Elmer Osteopatia"} error={e.name} />
-            <TextField label="City or area" name="city" required defaultValue={d.city} error={e.city} />
-            <TextField label="Address (optional)" name="address" autoComplete="street-address" defaultValue={d.address} error={e.address} />
-            <TextField label="Service area (optional)" name="serviceArea" defaultValue={d.serviceArea} error={e.serviceArea} />
+            <TextField label={tr("Business name")} name="name" required defaultValue={d.name ?? "Elmer Osteopatia"} error={e.name} />
+            <TextField label={tr("City or area")} name="city" required defaultValue={d.city} error={e.city} />
+            <TextField label={tr("Address (optional)")} name="address" autoComplete="street-address" defaultValue={d.address} error={e.address} />
+            <TextField label={tr("Service area (optional)")} name="serviceArea" defaultValue={d.serviceArea} error={e.serviceArea} />
             <SelectField
-              label="Primary language"
+              label={tr("Primary language")}
               name="primaryLanguage"
               defaultValue={d.primaryLanguage ?? "en"}
               options={[{ value: "en", label: "English" }, { value: "es", label: "Español" }]}
               error={e.primaryLanguage}
             />
-            <TextField label="Phone (optional)" name="phone" type="tel" defaultValue={d.phone} error={e.phone} />
-            <TextField label="Website (optional)" name="website" type="url" inputMode="url" placeholder="https://" defaultValue={d.website} error={e.website} />
-            <TextField label="Booking URL (optional)" name="bookingUrl" type="url" inputMode="url" placeholder="https://" defaultValue={d.bookingUrl} error={e.bookingUrl} />
-            <TextField label="Google Business Profile URL (optional)" name="profileUrl" type="url" inputMode="url" placeholder="https://" defaultValue={d.profileUrl} error={e.profileUrl} />
+            <TextField label={tr("Phone (optional)")} name="phone" type="tel" defaultValue={d.phone} error={e.phone} />
+            <TextField label={tr("Website (optional)")} name="website" type="url" inputMode="url" placeholder={tr("https://")} defaultValue={d.website} error={e.website} />
+            <TextField label={tr("Booking URL (optional)")} name="bookingUrl" type="url" inputMode="url" placeholder={tr("https://")} defaultValue={d.bookingUrl} error={e.bookingUrl} />
+            <TextField label={tr("Google Business Profile URL (optional)")} name="profileUrl" type="url" inputMode="url" placeholder={tr("https://")} defaultValue={d.profileUrl} error={e.profileUrl} />
             <div className="grid grid-cols-2 gap-3">
-              <TextField label="Latitude (optional)" name="latitude" inputMode="decimal" defaultValue={d.latitude} error={e.latitude} hint="Used for the geo map." />
-              <TextField label="Longitude (optional)" name="longitude" inputMode="decimal" defaultValue={d.longitude} error={e.longitude} />
+              <TextField label={tr("Latitude (optional)")} name="latitude" inputMode="decimal" defaultValue={d.latitude} error={e.latitude} hint={tr("Used for the geo map.")} />
+              <TextField label={tr("Longitude (optional)")} name="longitude" inputMode="decimal" defaultValue={d.longitude} error={e.longitude} />
             </div>
             <SelectField
-              label="Reporting"
+              label={tr("Reporting")}
               name="reportingCadence"
               defaultValue={d.reportingCadence ?? "weekly"}
               options={[
-                { value: "weekly", label: "Weekly" },
-                { value: "monthly", label: "Monthly" },
-                { value: "both", label: "Weekly and monthly" },
+                { value: "weekly", label: tr("Weekly") },
+                { value: "monthly", label: tr("Monthly") },
+                { value: "both", label: tr("Weekly and monthly") },
               ]}
               error={e.reportingCadence}
             />
-            <p className="text-xs text-muted">Timezone: Europe/Madrid · Currency: EUR</p>
+            <p className="text-xs text-muted">{tr("Timezone: Europe/Madrid · Currency: EUR")}</p>
           </Card>
-          {state.message && <p role="alert" className="text-sm text-danger">{state.message}</p>}
+          {state.message && <p role="alert" className="text-sm text-danger">{tr(state.message)}</p>}
           <div className="flex gap-3">
-            {!defaults && <Button type="button" variant="secondary" onClick={() => setStep(0)}>Back</Button>}
+            {!defaults && <Button type="button" variant="secondary" onClick={() => setStep(0)}>{tr("Back")}</Button>}
             <Button type="submit" className="flex-1" disabled={pending}>
-              {pending ? "Saving…" : "Save and continue"}
+              {pending ? tr("Saving…") : tr("Save and continue")}
             </Button>
           </div>
         </form>

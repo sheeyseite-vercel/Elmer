@@ -88,6 +88,14 @@ export async function seedDemo(uid: string) {
     });
   }
 
+  const comp = (n: number, name: string, kind: "own" | "competitor", rating: number, reviews: number, cats: string[]) => {
+    writes.push({ ref: db.collection("competitors").doc(`${id}_c${n}`), data: { businessId: id, name, profileUrl: "", location: "DEMO – Madrid", notes: "DEMO", kind, status: "active", createdAt: now, updatedAt: now } });
+    writes.push({ ref: db.collection("competitor_snapshots").doc(`${id}_c${n}_s1`), data: { businessId: id, competitorId: `${id}_c${n}`, checkedOn: addDays(today, -5), rating, reviewCount: reviews, categories: cats, services: [], sourceUrl: "", sourceNote: "DEMO data, not a real listing", createdAt: now } });
+  };
+  comp(0, "DEMO – Fictional Clinic", "own", 4.6, 58, ["Osteopath"]);
+  comp(1, "DEMO Clinic A", "competitor", 4.8, 120, ["Osteopath", "Physiotherapist"]);
+  comp(2, "DEMO Clinic B", "competitor", 4.3, 35, ["Osteopath"]);
+
   const m0 = `${today.slice(0, 7)}-01`;
   const prevEnd = addDays(m0, -1);
   const prevStart = `${prevEnd.slice(0, 7)}-01`;

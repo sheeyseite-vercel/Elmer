@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getSessionUser } from "@/lib/auth/session";
 import { LoginForm } from "./login-form";
@@ -15,6 +16,9 @@ export default async function LoginPage() {
         <h1 className="text-2xl font-semibold">{tr("Sign in")}</h1>
       </div>
       <LoginForm />
+      <p className="text-center text-xs text-muted">
+        <Link href="/privacy" className="underline">{tr("Privacy")}</Link> · <Link href="/terms" className="underline">{tr("Terms")}</Link>
+      </p>
     </main>
   );
 }

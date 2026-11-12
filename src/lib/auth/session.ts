@@ -3,6 +3,7 @@ import { cache } from "react";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { adminAuth } from "@/lib/firebase/admin";
+import { DEVICE_COOKIE, readDeviceToken } from "@/lib/auth/device";
 
 export const SESSION_COOKIE = "__session";
 export const SESSION_MAX_AGE_MS = 1000 * 60 * 60 * 24 * 5; // 5 days
@@ -26,15 +27,19 @@ export function isEmailAllowed(email: string | undefined | null): boolean {
  * cache() makes the layout and the page share one check per request.
  */
 export const getSessionUser = cache(async (): Promise<SessionUser | null> => {
-  const cookie = (await cookies()).get(SESSION_COOKIE)?.value;
-  if (!cookie) return null;
-  try {
-    const decoded = await adminAuth().verifySessionCookie(cookie, false);
-    if (!isEmailAllowed(decoded.email)) return null;
-    return { uid: decoded.uid, email: decoded.email ?? null };
-  } catch {
-    return null;
+  const jar = await cookies();
+  const cookie = jar.get(SESSION_COOKIE)?.value;
+  if (cookie) {
+    try {
+      const decoded = await adminAuth().verifySessionCookie(cookie, false);
+      if (isEmailAllowed(decoded.email)) return { uid: decoded.uid, email: decoded.email ?? null };
+    } catch {
+      // fall through to the trusted-device cookie
+    }
   }
+  const device = readDeviceToken(jar.get(DEVICE_COOKIE)?.value);
+  if (device && isEmailAllowed(device.email)) return device;
+  return null;
 });
 
 /** Use at the top of every protected server component / action. */

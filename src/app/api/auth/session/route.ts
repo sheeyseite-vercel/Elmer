@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { adminAuth } from "@/lib/firebase/admin";
+import { DEVICE_COOKIE, DEVICE_MAX_AGE_S, makeDeviceToken } from "@/lib/auth/device";
 import { SESSION_COOKIE, SESSION_MAX_AGE_MS, isEmailAllowed } from "@/lib/auth/session";
 
 const body = z.object({ idToken: z.string().min(20).max(4096) });
@@ -35,6 +36,16 @@ export async function POST(req: Request) {
       path: "/",
       maxAge: SESSION_MAX_AGE_MS / 1000,
     });
+    const device = makeDeviceToken(decoded.uid, decoded.email ?? null);
+    if (device) {
+      res.cookies.set(DEVICE_COOKIE, device, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+        maxAge: DEVICE_MAX_AGE_S,
+      });
+    }
     return res;
   } catch {
     return NextResponse.json({ error: "Could not sign in." }, { status: 401 });
@@ -44,5 +55,6 @@ export async function POST(req: Request) {
 export async function DELETE() {
   const res = NextResponse.json({ ok: true });
   res.cookies.set(SESSION_COOKIE, "", { path: "/", maxAge: 0 });
+  res.cookies.set(DEVICE_COOKIE, "", { path: "/", maxAge: 0 });
   return res;
 }

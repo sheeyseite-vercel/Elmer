@@ -4,6 +4,7 @@ import { Bricolage_Grotesque, Inter, Noto_Sans_Arabic } from "next/font/google";
 import "./globals.css";
 import { RegisterSW } from "@/components/pwa/register-sw";
 import { DIR } from "@/lib/i18n/dict";
+import { I18nProvider } from "@/lib/i18n/client";
 import { getT } from "@/lib/i18n/server";
 
 const inter = Inter({ subsets: ["latin", "latin-ext"], variable: "--font-inter", display: "swap" });
@@ -46,7 +47,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         >
           {t("app.skip")}
         </a>
-        {children}
+        <I18nProvider locale={locale}>{children}</I18nProvider>
         <RegisterSW />
       </body>
     </html>

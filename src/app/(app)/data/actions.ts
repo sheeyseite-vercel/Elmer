@@ -3,6 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { getT } from "@/lib/i18n/server";
+import type { Tr } from "@/lib/i18n/translate";
 import { requireUser } from "@/lib/auth/session";
 import { adminDb } from "@/lib/firebase/admin";
 import { getBusinessForUser } from "@/lib/data/business";
@@ -54,25 +56,25 @@ type Analysis =
   | { ok: false; message: string }
   | { ok: true; req: z.output<typeof requestSchema>; totalRows: number; result: ReturnType<typeof buildImport> };
 
-function analyze(raw: ImportRequest): Analysis {
+function analyze(raw: ImportRequest, tr: Tr): Analysis {
   const parsedReq = requestSchema.safeParse(raw);
-  if (!parsedReq.success) return { ok: false, message: "The import request is invalid or the file is too large." };
+  if (!parsedReq.success) return { ok: false, message: tr("The import request is invalid or the file is too large.") };
   const req = parsedReq.data;
 
   const csv = parseCsv(req.text);
-  if (csv.headers.length < 2 || csv.rows.length === 0) return { ok: false, message: "The file has no data rows." };
-  if (csv.rows.length > MAX_ROWS) return { ok: false, message: `Too many rows (maximum ${MAX_ROWS}).` };
+  if (csv.headers.length < 2 || csv.rows.length === 0) return { ok: false, message: tr("The file has no data rows.") };
+  if (csv.rows.length > MAX_ROWS) return { ok: false, message: tr("Too many rows (maximum {max}).", { max: MAX_ROWS }) };
 
   const metricColumns: Record<number, MetricKey> = {};
   for (const [k, v] of Object.entries(req.metricColumns)) {
     const col = Number(k);
     if (!Number.isInteger(col) || col < 0 || col >= csv.headers.length || col === req.dateColumn) {
-      return { ok: false, message: "The column mapping does not match the file." };
+      return { ok: false, message: tr("The column mapping does not match the file.") };
     }
     metricColumns[col] = v;
   }
-  if (req.dateColumn >= csv.headers.length) return { ok: false, message: "The date column does not exist in the file." };
-  if (Object.keys(metricColumns).length === 0) return { ok: false, message: "Map at least one metric column." };
+  if (req.dateColumn >= csv.headers.length) return { ok: false, message: tr("The date column does not exist in the file.") };
+  if (Object.keys(metricColumns).length === 0) return { ok: false, message: tr("Map at least one metric column.") };
 
   const result = buildImport(
     csv.headers,
@@ -97,8 +99,9 @@ async function countExisting(businessId: string, records: MetricRecord[]): Promi
 }
 
 export async function previewImport(raw: ImportRequest): Promise<PreviewResult> {
+  const { tr } = await getT();
   const { business } = await context();
-  const a = analyze(raw);
+  const a = analyze(raw, tr);
   if (!a.ok) return a;
   const { result } = a;
 
@@ -134,11 +137,12 @@ export type CommitResult =
   | { ok: false; message: string };
 
 export async function commitImport(raw: ImportRequest): Promise<CommitResult> {
+  const { tr } = await getT();
   const { user, business } = await context();
-  const a = analyze(raw);
+  const a = analyze(raw, tr);
   if (!a.ok) return a;
   const { req, result } = a;
-  if (result.accepted.length === 0) return { ok: false, message: "No valid rows to import. Fix the errors and try again." };
+  if (result.accepted.length === 0) return { ok: false, message: tr("No valid rows to import. Fix the errors and try again.") };
 
   const db = adminDb();
   const existing = await countExisting(business.id, result.accepted);
@@ -204,11 +208,12 @@ export async function commitImport(raw: ImportRequest): Promise<CommitResult> {
 }
 
 export async function deleteImport(importId: string): Promise<{ ok: boolean; message: string }> {
+  const { tr } = await getT();
   const { user, business } = await context();
   const db = adminDb();
   const ref = db.collection("imports").doc(importId);
   const doc = await ref.get();
-  if (!doc.exists || doc.data()?.businessId !== business.id) return { ok: false, message: "Import not found." };
+  if (!doc.exists || doc.data()?.businessId !== business.id) return { ok: false, message: tr("Import not found.") };
 
   const metrics = await db
     .collection("performance_metrics")
@@ -230,7 +235,7 @@ export async function deleteImport(importId: string): Promise<{ ok: boolean; mes
     createdAt: new Date().toISOString(),
   });
   revalidatePath(PATH);
-  return { ok: true, message: `Removed the import and ${metrics.size} values.` };
+  return { ok: true, message: tr("Removed the import and {n} values.", { n: metrics.size }) };
 }
 
 // ---------- Manual entry ----------
@@ -245,6 +250,7 @@ const manualSchema = z.object({
 export type ManualState = { ok?: boolean; errors?: Record<string, string[] | undefined>; message?: string };
 
 export async function addManualMetric(_prev: ManualState, formData: FormData): Promise<ManualState> {
+  const { tr } = await getT();
   const { user, business } = await context();
   const parsed = manualSchema.safeParse({
     metric: formData.get("metric"),
@@ -252,9 +258,9 @@ export async function addManualMetric(_prev: ManualState, formData: FormData): P
     value: formData.get("value"),
     note: formData.get("note") ?? "",
   });
-  if (!parsed.success) return { errors: parsed.error.flatten().fieldErrors, message: "Please fix the highlighted fields." };
+  if (!parsed.success) return { errors: parsed.error.flatten().fieldErrors, message: tr("Please fix the highlighted fields.") };
   const { metric, date, value, note } = parsed.data;
-  if (date > todayInMadrid()) return { errors: { date: ["The date cannot be in the future"] }, message: "Please fix the highlighted fields." };
+  if (date > todayInMadrid()) return { errors: { date: [tr("The date cannot be in the future")] }, message: tr("Please fix the highlighted fields.") };
 
   const db = adminDb();
   const ref = db.collection("performance_metrics").doc(metricDocId(business.id, metric, date, "manual"));
@@ -282,15 +288,16 @@ export async function addManualMetric(_prev: ManualState, formData: FormData): P
     createdAt: now,
   });
   revalidatePath(PATH);
-  return { ok: true, message: replaced ? "Saved. It replaced the earlier manual value for that day." : "Saved." };
+  return { ok: true, message: replaced ? tr("Saved. It replaced the earlier manual value for that day.") : tr("Saved.") };
 }
 
 export async function deleteManualMetric(id: string): Promise<{ ok: boolean; message: string }> {
+  const { tr } = await getT();
   const { user, business } = await context();
   const ref = adminDb().collection("performance_metrics").doc(id);
   const doc = await ref.get();
   const x = doc.data();
-  if (!doc.exists || x?.businessId !== business.id || x?.sourceKind !== "manual") return { ok: false, message: "Value not found." };
+  if (!doc.exists || x?.businessId !== business.id || x?.sourceKind !== "manual") return { ok: false, message: tr("Value not found.") };
   await ref.delete();
   await adminDb().collection("audit_logs").add({
     businessId: business.id,
@@ -301,5 +308,5 @@ export async function deleteManualMetric(id: string): Promise<{ ok: boolean; mes
     createdAt: new Date().toISOString(),
   });
   revalidatePath(PATH);
-  return { ok: true, message: "Deleted." };
+  return { ok: true, message: tr("Deleted.") };
 }

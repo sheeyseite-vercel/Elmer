@@ -10,10 +10,10 @@ const sourceText: Record<SourceKind, string> = {
 };
 
 /** Every dataset must show where it came from (product rule 2). */
-export function SourceBadge({ kind, detail }: { kind: SourceKind; detail?: string }) {
+export function SourceBadge({ kind, detail, tr }: { kind: SourceKind; detail?: string; tr?: (t: string) => string }) {
   return (
     <span className="inline-flex items-center gap-1 rounded-full border border-border bg-surface-2 px-2.5 py-0.5 text-xs text-muted">
-      <span className="font-medium text-text">{sourceText[kind]}</span>
+      <span className="font-medium text-text">{tr ? tr(sourceText[kind]) : sourceText[kind]}</span>
       {detail ? <span>· {detail}</span> : null}
     </span>
   );

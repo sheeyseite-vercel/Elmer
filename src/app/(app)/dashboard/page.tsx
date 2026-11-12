@@ -8,6 +8,7 @@ import { requireUser } from "@/lib/auth/session";
 import {
   compare, previousRange, recommendedActions, resolveDaily, resolveRange, series, summarize, type Summary,
 } from "@/lib/analytics/dashboard";
+import { getT } from "@/lib/i18n/server";
 import { getBusinessForUser } from "@/lib/data/business";
 import { fetchMetricRecords, METRIC_FETCH_LIMIT, todayInMadrid } from "@/lib/data/metrics";
 import { METRICS } from "@/lib/metrics";
@@ -26,11 +27,12 @@ const PRESETS = [
 
 const fmtNum = (n: number) => new Intl.NumberFormat("en-GB").format(n);
 
-function sourceBadges(s: Summary) {
-  return s.sources.map((k) => <SourceBadge key={k} kind={k} />);
+function sourceBadges(s: Summary, tr: (t: string) => string) {
+  return s.sources.map((k) => <SourceBadge key={k} kind={k} tr={tr} />);
 }
 
 export default async function DashboardPage({ searchParams }: { searchParams: SP }) {
+  const { tr } = await getT();
   const sp = await searchParams;
   const user = await requireUser();
   const business = await getBusinessForUser(user.uid);
@@ -46,7 +48,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: SP
   const rows = METRICS.map((m) => {
     const cur = summarize(daily, m.key, range.from, range.to);
     const pre = summarize(daily, m.key, prev.from, prev.to);
-    return { ...m, cur, pre, cmp: compare(cur, pre) };
+    return { ...m, cur, pre, cmp: compare(cur, pre, tr) };
   });
 
   const withData = rows.filter((r) => r.cur.total !== null);
@@ -70,6 +72,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: SP
     today,
     records,
     metricLabels: Object.fromEntries(METRICS.map((m) => [m.key, m.label])),
+    tr,
     currentCoverage: rows.map((r) => ({ metric: r.key, daysWithData: r.cur.daysWithData, days: r.cur.days })),
     missingProfileFields: missing,
   });
@@ -88,13 +91,13 @@ export default async function DashboardPage({ searchParams }: { searchParams: SP
   return (
     <div className="space-y-5">
       <div className="space-y-1">
-        <h1 className="text-2xl font-semibold">Dashboard</h1>
+        <h1 className="text-2xl font-semibold">{tr("Dashboard")}</h1>
         <p className="text-sm text-muted">
-          {range.label}: {range.from} to {range.to} ({range.days} days) · compared with {prev.from} to {prev.to}
+          {tr(range.label)}: {range.from} → {range.to} ({tr("{n} days", { n: range.days })}) · {tr("compared with")} {prev.from} → {prev.to}
         </p>
       </div>
 
-      <nav aria-label="Date range" className="space-y-3">
+      <nav aria-label={tr("Date range")} className="space-y-3">
         <div className="flex flex-wrap gap-2">
           {PRESETS.map((p) => (
             <Link
@@ -106,69 +109,68 @@ export default async function DashboardPage({ searchParams }: { searchParams: SP
                 range.preset === p.value ? "border-primary bg-surface-2 text-text" : "border-border text-muted hover:text-text",
               )}
             >
-              {p.label}
+              {tr(p.label)}
             </Link>
           ))}
         </div>
         <form method="get" action="/dashboard" className="flex flex-wrap items-end gap-2">
           <input type="hidden" name="range" value="custom" />
           <label className="text-xs text-muted">
-            From
+            {tr("From")}
             <input name="from" type="date" max={today} defaultValue={range.from} required className="mt-1 block min-h-11 rounded-xl border border-border bg-surface-2 px-3 text-base text-text" />
           </label>
           <label className="text-xs text-muted">
-            To
+            {tr("To")}
             <input name="to" type="date" max={today} defaultValue={range.to} required className="mt-1 block min-h-11 rounded-xl border border-border bg-surface-2 px-3 text-base text-text" />
           </label>
           <button type="submit" className="min-h-11 rounded-xl border border-border bg-surface-2 px-4 text-sm font-medium">
-            Apply
+            {tr("Apply")}
           </button>
         </form>
-        {error && <p role="alert" className="text-sm text-danger">{error}</p>}
+        {error && <p role="alert" className="text-sm text-danger">{tr(error)}</p>}
       </nav>
 
       {records.length === 0 ? (
         <EmptyState>
-          Nothing is stored yet, so there is nothing to chart. Import a CSV or enter a daily value on the{" "}
-          <Link href="/data" className="text-accent underline">Data page</Link>. No numbers are shown until real data
-          exists.
+          {tr("Nothing is stored yet, so there is nothing to chart. Import a CSV or enter a daily value on the")}{" "}
+          <Link href="/data" className="text-accent underline">{tr("Data page")}</Link>. {tr("No numbers are shown until real data exists.")}
         </EmptyState>
       ) : (
         <p className="text-xs text-muted">
-          Newest day with data: {latestDay} · Last data added: {new Date(latestAdded).toLocaleString("en-GB", { timeZone: "Europe/Madrid" })} (Madrid time)
+          {tr("Newest day with data:")} {latestDay} · {tr("Last data added:")} {new Date(latestAdded).toLocaleString("en-GB", { timeZone: "Europe/Madrid" })} ({tr("Madrid time")})
         </p>
       )}
       {truncated && (
         <p role="alert" className="text-sm text-warning">
-          More than {METRIC_FETCH_LIMIT} values are stored, so totals may be incomplete.
+          {tr("More than {n} values are stored, so totals may be incomplete.", { n: METRIC_FETCH_LIMIT })}
         </p>
       )}
 
-      <section aria-label="Key figures" className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <section aria-label={tr("Key figures")} className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {rows.map((r) => (
           <Card key={r.key} className="space-y-2">
-            <p className="text-sm text-muted">{r.label}</p>
+            <p className="text-sm text-muted">{tr(r.label)}</p>
             {r.cur.total === null ? (
-              <p className="text-2xl font-semibold">No data yet</p>
+              <p className="text-2xl font-semibold">{tr("No data yet")}</p>
             ) : (
               <p className="font-display text-4xl font-semibold tabular-nums leading-none">{fmtNum(r.cur.total)}</p>
             )}
             <p className="text-xs text-muted">
-              {r.cur.total === null ? "No values in this period." : `Total from ${r.cur.daysWithData} of ${r.cur.days} days with data`}
+              {r.cur.total === null ? tr("No values in this period.") : tr("Total from {a} of {b} days with data", { a: r.cur.daysWithData, b: r.cur.days })}
             </p>
             {r.cmp.kind === "ok" ? (
               <p className="text-sm">
-                {r.cmp.delta === 0 ? "No change" : `${r.cmp.delta > 0 ? "+" : "−"}${fmtNum(Math.abs(r.cmp.delta))}`}
+                {r.cmp.delta === 0 ? tr("No change") : `${r.cmp.delta > 0 ? "+" : "−"}${fmtNum(Math.abs(r.cmp.delta))}`}
                 {r.cmp.pct !== null && r.cmp.delta !== 0 ? ` (${r.cmp.pct > 0 ? "+" : "−"}${Math.abs(r.cmp.pct).toFixed(1)}%)` : ""}
-                <span className="text-muted"> vs previous period ({fmtNum(r.pre.total ?? 0)})</span>
+                <span className="text-muted"> {tr("vs previous period")} ({fmtNum(r.pre.total ?? 0)})</span>
               </p>
             ) : (
-              r.cur.total !== null && <p className="text-xs text-muted">No comparison: {r.cmp.reason}</p>
+              r.cur.total !== null && <p className="text-xs text-muted">{tr("No comparison:")} {r.cmp.reason}</p>
             )}
-            <div className="flex flex-wrap gap-1">{sourceBadges(r.cur)}</div>
+            <div className="flex flex-wrap gap-1">{sourceBadges(r.cur, tr)}</div>
             {r.cur.total !== null && (
               <Link href={href({ metric: r.key })} className="inline-flex min-h-11 items-center text-sm text-accent underline">
-                Show chart
+                {tr("Show chart")}
               </Link>
             )}
           </Card>
@@ -179,38 +181,38 @@ export default async function DashboardPage({ searchParams }: { searchParams: SP
         <Card className="space-y-3">
           <DailyBars
             points={points}
-            title={`${selectedRow.label} per day`}
-            unit="Count per day"
+            title={tr("{metric} per day", { metric: tr(selectedRow.label) })}
+            unit={tr("Count per day")}
             period={`${range.from} to ${range.to}`}
-            source={selectedRow.cur.sources.map((s) => (s === "manual" ? "Manually entered" : "Imported CSV")).join(" + ") || "none"}
+            source={selectedRow.cur.sources.map((s) => (s === "manual" ? tr("Manually entered") : tr("Imported CSV"))).join(" + ") || tr("none")}
+            tr={tr}
           />
         </Card>
       )}
 
       <Card className="space-y-3">
-        <CardTitle>Recommended actions</CardTitle>
+        <CardTitle>{tr("Recommended actions")}</CardTitle>
         {actions.length === 0 ? (
-          <p className="text-sm text-muted">Nothing to flag from the data stored right now.</p>
+          <p className="text-sm text-muted">{tr("Nothing to flag from the data stored right now.")}</p>
         ) : (
           <ol className="space-y-3">
             {actions.map((a) => (
               <li key={a.title} className="rounded-xl border border-border p-3 text-sm">
                 <p className="font-medium">{a.title}</p>
-                <p className="text-muted">Evidence: {a.evidence}</p>
-                <p>Next step: {a.action}</p>
-                <Link href={a.href} className="inline-flex min-h-11 items-center text-accent underline">Open</Link>
+                <p className="text-muted">{tr("Evidence:")} {a.evidence}</p>
+                <p>{tr("Next step:")} {a.action}</p>
+                <Link href={a.href} className="inline-flex min-h-11 items-center text-accent underline">{tr("Open")}</Link>
               </li>
             ))}
           </ol>
         )}
         <p className="text-xs text-muted">
-          These come only from what is stored here. They say nothing about rankings or future customers.
+          {tr("These come only from what is stored here. They say nothing about rankings or future customers.")}
         </p>
       </Card>
 
       <p className="text-xs text-muted">
-        Definitions: each figure is the sum of daily counts exactly as provided by its source. Imported and manual values
-        for the same day are never added together; the imported one is used. The app does not estimate missing days.
+        {tr("Definitions: each figure is the sum of daily counts exactly as provided by its source. Imported and manual values for the same day are never added together; the imported one is used. The app does not estimate missing days.")}
       </p>
     </div>
   );

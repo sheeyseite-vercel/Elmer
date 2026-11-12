@@ -94,16 +94,20 @@ export type Comparison =
   | { kind: "ok"; delta: number; pct: number | null }
   | { kind: "unavailable"; reason: string };
 
+/** Text is passed through tr() so the page can show it in the reader's language; the default is English. */
+export type TrFn = (text: string, vars?: Record<string, string | number>) => string;
+const en: TrFn = (t, v) => (v ? t.replace(/\{(\w+)\}/g, (m, k: string) => (k in v ? String(v[k]) : m)) : t);
+
 const MIN_COVERAGE = 0.8;
 
 /** A comparison is only shown when BOTH periods have data on at least 80% of their days. */
-export function compare(cur: Summary, prev: Summary): Comparison {
-  if (cur.total === null) return { kind: "unavailable", reason: "No data in this period." };
-  if (prev.total === null) return { kind: "unavailable", reason: "No data in the previous period." };
+export function compare(cur: Summary, prev: Summary, tr: TrFn = en): Comparison {
+  if (cur.total === null) return { kind: "unavailable", reason: tr("No data in this period.") };
+  if (prev.total === null) return { kind: "unavailable", reason: tr("No data in the previous period.") };
   if (cur.daysWithData / cur.days < MIN_COVERAGE)
-    return { kind: "unavailable", reason: `This period has data for only ${cur.daysWithData} of ${cur.days} days.` };
+    return { kind: "unavailable", reason: tr("This period has data for only {a} of {b} days.", { a: cur.daysWithData, b: cur.days }) };
   if (prev.daysWithData / prev.days < MIN_COVERAGE)
-    return { kind: "unavailable", reason: `The previous period has data for only ${prev.daysWithData} of ${prev.days} days.` };
+    return { kind: "unavailable", reason: tr("The previous period has data for only {a} of {b} days.", { a: prev.daysWithData, b: prev.days }) };
   const delta = cur.total - prev.total;
   return { kind: "ok", delta, pct: prev.total === 0 ? null : (delta / prev.total) * 100 };
 }
@@ -128,15 +132,17 @@ export function recommendedActions(input: {
   metricLabels: Record<string, string>;
   currentCoverage: { metric: string; daysWithData: number; days: number }[];
   missingProfileFields: string[];
+  tr?: TrFn;
 }): Action[] {
+  const tr = input.tr ?? en;
   const out: Action[] = [];
   const { today, records } = input;
 
   if (records.length === 0) {
     out.push({
-      title: "Add your first data",
-      evidence: "No performance values are stored yet.",
-      action: "Import a CSV or enter a daily value by hand.",
+      title: tr("Add your first data"),
+      evidence: tr("No performance values are stored yet."),
+      action: tr("Import a CSV or enter a daily value by hand."),
       href: "/data",
     });
   } else {
@@ -144,18 +150,18 @@ export function recommendedActions(input: {
     const age = daysInclusive(latest, today) - 1;
     if (age > 14) {
       out.push({
-        title: "Update your data",
-        evidence: `The newest stored value is for ${latest}, ${age} days ago.`,
-        action: "Import a newer export so the dashboard reflects recent weeks.",
+        title: tr("Update your data"),
+        evidence: tr("The newest stored value is for {date}, {n} days ago.", { date: latest, n: age }),
+        action: tr("Import a newer export so the dashboard reflects recent weeks."),
         href: "/data",
       });
     }
     for (const c of input.currentCoverage) {
       if (c.daysWithData > 0 && c.daysWithData / c.days < 0.5) {
         out.push({
-          title: `Fill gaps in ${input.metricLabels[c.metric] ?? c.metric}`,
-          evidence: `Only ${c.daysWithData} of ${c.days} days in this period have a value.`,
-          action: "Import a fuller export or add the missing days manually.",
+          title: tr("Fill gaps in {metric}", { metric: tr(input.metricLabels[c.metric] ?? c.metric) }),
+          evidence: tr("Only {a} of {b} days in this period have a value.", { a: c.daysWithData, b: c.days }),
+          action: tr("Import a fuller export or add the missing days manually."),
           href: "/data",
         });
         break;
@@ -165,9 +171,9 @@ export function recommendedActions(input: {
 
   if (input.missingProfileFields.length > 0) {
     out.push({
-      title: "Complete your business details",
-      evidence: `Not filled in yet: ${input.missingProfileFields.join(", ")}.`,
-      action: "Add them so later modules (map, checklist) have what they need.",
+      title: tr("Complete your business details"),
+      evidence: tr("Not filled in yet: {list}.", { list: input.missingProfileFields.map((f) => tr(f)).join(", ") }),
+      action: tr("Add them so later modules (map, checklist) have what they need."),
       href: "/onboarding",
     });
   }
